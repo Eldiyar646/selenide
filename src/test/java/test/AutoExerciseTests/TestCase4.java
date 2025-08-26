@@ -44,7 +44,7 @@ public class TestCase4 extends BaseTest {
         });
 
         var afterLogin = login
-                .inputLoginEmail("1@3.2")
+                .inputLoginEmail("10@10.10")
                 .inputLoginPassword("1")
                 .clickLoginButton();
 

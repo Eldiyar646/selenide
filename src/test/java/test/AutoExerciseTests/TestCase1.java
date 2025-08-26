@@ -14,7 +14,6 @@ import static io.qameta.allure.Allure.step;
 @Tag(Tags.SMOKE)
 @Tag(Tags.WEB)
 
-
 public class TestCase1 extends BaseTest {
     Faker faker = new Faker();
 
@@ -45,10 +44,10 @@ public class TestCase1 extends BaseTest {
                 .clickSignUpLoginTab()
                 .waitForPageLoaded();
 
-        step("Verify 'New user signup!' is visible", () -> {
-            softAssert.assertThat(signup.titlesInAllPages("New user signup!"))
-                    .as("New user signup! is visible")
-                    .isEqualToIgnoringCase("New user signup!");
+        step("Verify 'New User Signup!' is visible", () -> {
+            softAssert.assertThat(signup.titlesInAllPages("New User Signup!"))
+                    .as("New User Signup! is visible")
+                    .isEqualToIgnoringCase("New User Signup!");
         });
 
         var afterSignup = signup
@@ -56,10 +55,10 @@ public class TestCase1 extends BaseTest {
                 .inputSignUpEmail(generatedEmail)
                 .clickSignUpButton();
 
-        step("Verify that 'Enter account information' is visible", () -> {
-            softAssert.assertThat(signup.titlesInAllPages("Enter account information"))
-                    .as("'Enter account information' is visible")
-                    .isEqualToIgnoringCase("Enter account information");
+        step("Verify that 'Enter Account Information' is visible", () -> {
+            softAssert.assertThat(signup.titlesInAllPages("Enter Account Information"))
+                    .as("Enter Account Information is visible")
+                    .isEqualToIgnoringCase("Enter Account Information");
         });
 
         var accountCreated = afterSignup.waitForPageLoaded()
@@ -75,7 +74,7 @@ public class TestCase1 extends BaseTest {
 
         step("Verify that 'Account Created!' is visible", () -> {
             softAssert.assertThat(accountCreated.titlesInAllPages("Account Created!"))
-                    .as("'Account Created!' is visible")
+                    .as("   Account Created! is visible")
                     .isEqualToIgnoringCase("Account Created!");
         });
 

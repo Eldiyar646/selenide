@@ -46,7 +46,7 @@ public class TestCase5 extends BaseTest {
 
         signup
                 .inputSignUpName("1")
-                .inputSignUpEmail("1@3.2")
+                .inputSignUpEmail("10@10.10")
                 .clickSignUpButton();
 
         step("Verify error 'Email Address already exist!' is visible", () -> {
