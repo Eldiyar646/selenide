@@ -1,16 +1,14 @@
 package com.selenide.layers.web.page.productsPage;
 
 import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.ElementsCollection;
 import com.selenide.enums.ElementsOnPage;
 import com.selenide.layers.web.page.BasePage;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
-import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byText;
-import static com.codeborne.selenide.Selenide.*;
-import static org.openqa.selenium.Keys.ENTER;
+import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.page;
 
 public class ProductsPage extends BasePage<ProductsPage> {
 
@@ -23,23 +21,19 @@ public class ProductsPage extends BasePage<ProductsPage> {
         return this;
     }
 
-    @Step("Wait products list will visible {0}")
-    public ProductsPage isProductsListVisible() {
-        $x("//div[@class='features_items']").scrollIntoView(true).shouldBe(visible);
+    @Step("Input name on search line")
+    public ProductsPage inputSearchProduct(String value) {
+        elementManager.inputElementWithText(ElementsOnPage.SEARCH.getElementById(), value);
         return this;
     }
 
-    public ProductsPage searchProduct(String value) {
-        elementManager.inputElementWithText(ElementsOnPage.SEARCH.getElementById(), value + ENTER);
+    @Step("Click on search tab")
+    public ProductsPage clickSearchProduct() {
+        elementManager.click($("#submit_search"));
         return this;
     }
 
-    @Step("Check if searched products are visible")
-    public boolean isAllRelatedProductVisible() {
-        return !productCard.filter(Condition.visible).isEmpty();
-    }
-
-    @Step("Add product {0}")
+    @Step("Click add product button")
     public ProductsPage clickAddProduct(String productName) {
         var product = productCard.find(Condition.partialText(productName));
         var addButton = product.$("a.add-to-cart");
@@ -47,14 +41,12 @@ public class ProductsPage extends BasePage<ProductsPage> {
         return this;
     }
 
-    public ProductsPage clickContinueButton(){
+    @Step("Click continue shopping link")
+    public ProductsPage clickContinue() {
         elementManager.click($(byText("Continue Shopping")));
         return page(ProductsPage.class);
     }
-
-
-
-
+}
 
 
 //    public String findProductByName (String name) {
@@ -71,10 +63,3 @@ public class ProductsPage extends BasePage<ProductsPage> {
 //        return page(ProductsPage.class);
 //    }
 
-    @Override
-    protected ElementsCollection getTitles() {
-        return titlesInAllPages;
-    }
-
-
-}

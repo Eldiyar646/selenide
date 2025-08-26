@@ -2,15 +2,11 @@ package test.AutoExerciseTests;
 
 import base.BaseTest;
 import com.selenide.layers.web.page.home.HomePage;
-import io.qameta.allure.Owner;
-import io.qameta.allure.Severity;
+import io.qameta.allure.*;
 import io.qameta.allure.SeverityLevel;
 import net.datafaker.Faker;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import test.Tags;
 
 import static io.qameta.allure.Allure.step;
@@ -36,7 +32,7 @@ public class TestCase11 extends BaseTest {
 
         step("Verify that home page is visible successfully", () -> {
             softAssert.assertThat(home.isPageTabActive("Home"))
-                    .as("Home tab should be active")
+                    .as("Home page is loaded and visible successfully")
                     .isTrue();
         });
 
@@ -46,9 +42,9 @@ public class TestCase11 extends BaseTest {
                 .waitForPageLoaded();
 
         step("Verify text SUBSCRIPTION", () -> {
-            softAssert.assertThat(home.isTitleVisible("Subscription"))
+            softAssert.assertThat(home.titlesInAllPages("Subscription"))
                     .as("Text SUBSCRIPTION is visible")
-                    .isTrue();
+                    .isEqualToIgnoringCase("Subscription");
         });
 
         cartPage

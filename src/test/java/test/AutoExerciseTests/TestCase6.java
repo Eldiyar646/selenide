@@ -2,16 +2,13 @@ package test.AutoExerciseTests;
 
 import base.BaseTest;
 import com.selenide.layers.web.page.home.HomePage;
-import io.qameta.allure.Description;
-import io.qameta.allure.Owner;
-import io.qameta.allure.Severity;
+import io.qameta.allure.*;
 import io.qameta.allure.SeverityLevel;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.*;
 import test.Tags;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static io.qameta.allure.Allure.step;
 
 @Tag(Tags.SMOKE)
 @Tag(Tags.WEB)
@@ -24,21 +21,25 @@ public class TestCase6 extends BaseTest {
     @Description("Contact Us Form")
     @Severity(SeverityLevel.BLOCKER)
     void contactUsFormTest() {
+
+        var softAssert = new SoftAssertions();
+
         var home = open(HomePage.class)
                 .waitForPageLoaded();
 
-        assertThat(home.isPageTabActive("Home"))
-                .as("Home tab should be active")
-                .isTrue();
+        step("Verify that home page is visible successfully", () -> {
+            softAssert.assertThat(home.isPageTabActive("Home"))
+                    .as("Home page is loaded and visible successfully")
+                    .isTrue();
+        });
 
         var contactUs = home.clickContactUsTab();
 
-        assertThat(contactUs.isContactUsTabActive())
-                .as("Contact Us tab should be active")
-                .isTrue();
-        assertThat(contactUs.isGetInTouchTitleVisible())
-                .as("'Get In Touch' is visible")
-                .isTrue();
+        step("Verify 'Get In Touch' is visible", () -> {
+            softAssert.assertThat(home.titlesInAllPages("Get In Touch"))
+                    .as("'Get In Touch' is visible")
+                    .isEqualToIgnoringCase("Get In Touch");
+        });
 
         contactUs
                 .inputName().inputEmail()
@@ -47,15 +48,20 @@ public class TestCase6 extends BaseTest {
                 .uploadFile().clickSubmitButton()
                 .acceptAlert();
 
-        assertThat(contactUs.isSuccessMessageVisible())
-                .as("'Success! Your details have been submitted successfully.' is visible")
-                .isTrue();
-
-        assertThat(contactUs.isHomeButtonVisible())
-                .as("Home button is visible")
-                .isTrue();
+        step("Verify success message 'Success! Your details have been submitted successfully.' is visible", () -> {
+            softAssert.assertThat(contactUs.getMessageText("Success! Your details have been submitted successfully."))
+                    .isEqualTo("Success! Your details have been submitted successfully.");
+        });
 
         contactUs.clickHomeButton().waitForPageLoaded();
+
+        step("Verify that home page is visible successfully", () -> {
+            softAssert.assertThat(home.isPageTabActive("Home"))
+                    .as("Home page is loaded and visible successfully")
+                    .isTrue();
+        });
+
+        softAssert.assertAll();
 
     }
 }

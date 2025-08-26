@@ -1,5 +1,6 @@
 package com.selenide.enums;
 
+import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.SelenideElement;
 
 import static com.codeborne.selenide.Selenide.$x;
@@ -36,7 +37,7 @@ public enum ElementsOnPage {
     }
 
     public SelenideElement getElementById() {
-        return $x("//input[@id='" + value + "']");
+        return $x("//input[@id='" + value + "']").shouldBe(Condition.visible);
     }
 
 

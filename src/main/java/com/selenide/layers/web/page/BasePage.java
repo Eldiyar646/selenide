@@ -2,14 +2,21 @@ package com.selenide.layers.web.page;
 
 import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.ElementsCollection;
+import com.codeborne.selenide.Selenide;
+import com.codeborne.selenide.SelenideElement;
 import com.selenide.enums.ElementsOnPage;
+import com.selenide.enums.ElementsQa;
 import com.selenide.layers.web.manager.ElementManager;
 import com.selenide.layers.web.page.cart.CartPage;
+import com.selenide.layers.web.page.home.HomePage;
 import com.selenide.layers.web.page.productsPage.ProductDetailPage;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
+import java.time.Duration;
+
 import static com.codeborne.selenide.Condition.partialText;
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
 import static org.openqa.selenium.Keys.ENTER;
@@ -17,8 +24,6 @@ import static org.openqa.selenium.Keys.ENTER;
 public abstract class BasePage<T extends BasePage> {
 
     public abstract T waitForPageLoaded();
-
-    protected abstract ElementsCollection getTitles();
 
     protected final ElementManager elementManager = new ElementManager();
 
@@ -34,11 +39,11 @@ public abstract class BasePage<T extends BasePage> {
     protected final ElementsCollection productInformation =
             $$x("//div[@class='product-information']");
 
-    protected final ElementsCollection titlesInAllPages =
-            $$x("//div[contains(@class,'row')]//h2");
-
     protected final ElementsCollection listOfTestCases =
             $x("//section[@id='form']").findAll(By.className("panel-group"));
+
+    protected final SelenideElement productName =
+            $x("//div[@class='product-information']/h2");
 
     public boolean isPageTabActive(String tabName) {
         var activeTab = navBarElements.find(Condition.partialText(tabName))
@@ -47,14 +52,21 @@ public abstract class BasePage<T extends BasePage> {
         return true;
     }
 
-    public boolean isTitleVisible(String titleText) {
-        var title = titlesInAllPages.find(Condition.partialText(titleText));
-        return title.exists() && title.is(Condition.visible);
+    @Step("Check title in page")
+    public String titlesInAllPages (String value) {
+        return $x("//h2[contains(.,'" + value + "')]")
+                .shouldBe(Condition.visible).getText();
     }
 
+    @Step("Check all details of product ")
     public boolean isProductInformationVisible(String titleText) {
         var title = productInformation.find(Condition.partialText(titleText));
         return title.exists() && title.is(Condition.visible);
+    }
+
+    @Step("Check if product name is visible")
+    public boolean isProductNameVisible(String expectedName) {
+        return productName.shouldBe(Condition.visible).getText().equals(expectedName);
     }
 
     public boolean isSubscriptionAlertVisible() {
@@ -64,6 +76,12 @@ public abstract class BasePage<T extends BasePage> {
 
     protected void clickNavBarTab(String tabName) {
         navBarElements.find(Condition.partialText(tabName)).click();
+    }
+
+    @Step("Click continue button{0}")
+    public HomePage clickContinueButton() {
+        elementManager.click(ElementsQa.CONTINUE_BUTTON.getElement());
+        return Selenide.page(HomePage.class);
     }
 
     @Step("Click to view product {0}")
@@ -82,6 +100,23 @@ public abstract class BasePage<T extends BasePage> {
     public CartPage clickViewCart() {
         elementManager.click($(byText("View Cart")));
         return page(CartPage.class);
+    }
+
+    @Step("Wait products list will visible")
+    public boolean isProductsListVisible() {
+        return ($x("//div[@class='features_items']").has(visible));
+    }
+
+    @Step("Check if searched products are visible")
+    public boolean isAllRelatedProductVisible() {
+        return !productCard.filter(Condition.visible).isEmpty();
+    }
+
+    @Step("Get alert text from all pages")
+    public String getMessageText(String expectedMessage) {
+        return $(byText(expectedMessage))
+                .shouldBe(Condition.visible)
+                .getText();
     }
 
 }

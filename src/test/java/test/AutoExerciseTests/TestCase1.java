@@ -2,18 +2,14 @@ package test.AutoExerciseTests;
 
 import base.BaseTest;
 import com.selenide.layers.web.page.home.HomePage;
-import io.qameta.allure.Allure;
-import io.qameta.allure.Owner;
-import io.qameta.allure.Severity;
+import io.qameta.allure.*;
 import io.qameta.allure.SeverityLevel;
 import net.datafaker.Faker;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.*;
 import test.Tags;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static io.qameta.allure.Allure.step;
 
 @Tag(Tags.SMOKE)
 @Tag(Tags.WEB)
@@ -28,6 +24,9 @@ public class TestCase1 extends BaseTest {
     @DisplayName("Register User")
     @Severity(SeverityLevel.BLOCKER)
     void registerTest() {
+
+        var softAssert = new SoftAssertions();
+
         String generatedName = faker
                 .name().firstName();
         String generatedEmail = faker
@@ -36,9 +35,9 @@ public class TestCase1 extends BaseTest {
         var home = open(HomePage.class)
                 .waitForPageLoaded();
 
-        Allure.step("Verify Home page is visible", () -> {
-            assertThat(home.isPageTabActive("Home"))
-                    .as("'Home page is visible successfully' verified")
+        step("Verify that home page is visible successfully", () -> {
+            softAssert.assertThat(home.isPageTabActive("Home"))
+                    .as("Home page is loaded and visible successfully")
                     .isTrue();
         });
 
@@ -46,10 +45,10 @@ public class TestCase1 extends BaseTest {
                 .clickSignUpLoginTab()
                 .waitForPageLoaded();
 
-        Allure.step("Verify 'New user signup!' is visible", () -> {
-            assertThat(signup.isTitleVisible("New user signup!"))
-                    .as("'New user signup! is visible' verified")
-                    .isTrue();
+        step("Verify 'New user signup!' is visible", () -> {
+            softAssert.assertThat(signup.titlesInAllPages("New user signup!"))
+                    .as("New user signup! is visible")
+                    .isEqualToIgnoringCase("New user signup!");
         });
 
         var afterSignup = signup
@@ -57,10 +56,10 @@ public class TestCase1 extends BaseTest {
                 .inputSignUpEmail(generatedEmail)
                 .clickSignUpButton();
 
-        Allure.step("Verify that 'Enter account information' is visible", () -> {
-            assertThat(signup.isTitleVisible("Enter account information"))
-                    .as("'Enter account information is visible' verified")
-                    .isTrue();
+        step("Verify that 'Enter account information' is visible", () -> {
+            softAssert.assertThat(signup.titlesInAllPages("Enter account information"))
+                    .as("'Enter account information' is visible")
+                    .isEqualToIgnoringCase("Enter account information");
         });
 
         var accountCreated = afterSignup.waitForPageLoaded()
@@ -74,29 +73,31 @@ public class TestCase1 extends BaseTest {
                 .inputUserZipCode().inputUserMobilePhone()
                 .clickCreateAccountButton().waitForPageLoaded();
 
-        Allure.step("Verify that 'Account Created' is visible", () -> {
-            assertThat(accountCreated.isTitleVisible("Account Created!"))
-                    .as("'Account Created is visible' verified")
-                    .isTrue();
+        step("Verify that 'Account Created!' is visible", () -> {
+            softAssert.assertThat(accountCreated.titlesInAllPages("Account Created!"))
+                    .as("'Account Created!' is visible")
+                    .isEqualToIgnoringCase("Account Created!");
         });
 
         var homeAfterContinue = accountCreated.clickContinueButton().waitForPageLoaded();
 
         String banner = homeAfterContinue.getLoggedInBannerText();
-        Allure.step("Verify that 'Logged in as username' is visible", () -> {
-            assertThat(banner)
-                    .as("'Logged in as <username>'")
-                    .isEqualTo("Logged in as " + generatedName);
+        step("Verify that 'Logged in as username' is visible", () -> {
+            softAssert.assertThat(banner)
+                    .as("'Logged in as <username>' is visible")
+                    .isEqualToIgnoringCase("Logged in as " + generatedName);
         });
 
         var delete = homeAfterContinue.clickDeletedAccountTab().waitForPageLoaded();
 
-        Allure.step("Verify that 'Account deleted!' is visible", () -> {
-                    assertThat(delete.isTitleVisible("Account deleted!"))
-                            .as("'Account deleted! is visible' verified")
-                            .isTrue();
-                });
-                delete.clickContinueButton();
+        step("Verify that 'Account Deleted!' is visible", () -> {
+            softAssert.assertThat(delete.titlesInAllPages("Account Deleted!"))
+                    .as("'Account Deleted!' is visible")
+                    .isEqualToIgnoringCase("Account Deleted!");
+        });
+        delete.clickContinueButton();
+
+        softAssert.assertAll();
     }
 }
 

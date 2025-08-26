@@ -18,12 +18,6 @@ public class AmazonBrands extends BasePage<AmazonBrands> {
         return this;
     }
 
-    @Override
-    protected ElementsCollection getTitles() {
-        return null;
-    }
-
-
     public AmazonBrands search(String value) {
         elementManager.inputElementWithText($("#twotabsearchtextbox"), value + ENTER);
         return this;

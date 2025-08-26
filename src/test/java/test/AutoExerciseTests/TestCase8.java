@@ -17,17 +17,6 @@ import static io.qameta.allure.Allure.step;
 @Tag(Tags.SMOKE)
 @Tag(Tags.WEB)
 
-/*
-1. Launch browser
-2. Navigate to url 'http://automationexercise.com'
-3. Verify that home page is visible successfully
-4. Click on 'Products' button
-5. Verify user is navigated to ALL PRODUCTS page successfully
-6. The products list is visible
-7. Click on 'View Product' of first product
-8. User is landed to product detail page
-9. Verify that detail detail is visible: product name, category, price, availability, condition, brand
-*/
 public class TestCase8 extends BaseTest {
 
     @Test
@@ -36,6 +25,7 @@ public class TestCase8 extends BaseTest {
     @DisplayName("Verify All Products and product detail page")
     @Severity(SeverityLevel.BLOCKER)
     void verifyAllProductsTest() {
+
         var softAssert = new SoftAssertions();
 
         var home = open(HomePage.class)
@@ -43,7 +33,7 @@ public class TestCase8 extends BaseTest {
 
         step("Verify that home page is visible successfully", () -> {
             softAssert.assertThat(home.isPageTabActive("Home"))
-                    .as("Home tab should be active")
+                    .as("Home page is loaded and visible successfully")
                     .isTrue();
         });
 
@@ -51,32 +41,39 @@ public class TestCase8 extends BaseTest {
                 .waitForPageLoaded();
 
         step("Verify user is navigated to ALL PRODUCTS page successfully", () -> {
-            softAssert.assertThat(product.isPageTabActive("Products"))
-                    .as("Products tab should be active")
-                    .isTrue();
+            softAssert.assertThat(product.titlesInAllPages("All Products"))
+                    .as("'All Products' title should be visible")
+                    .isEqualToIgnoringCase("All Products");
+
         });
 
         step("The products list is visible", () -> {
-            softAssert.assertThat(product.isProductsListVisible().isTitleVisible("All products"))
-                    .as("All products title and list should be visible")
+            softAssert.assertThat(product.isProductsListVisible())
+                    .as("Product list should be visible")
                     .isTrue();
         });
 
-        product.clickViewProduct("Blue top").waitForPageLoaded();
+        product
+                .clickViewProduct("Blue top")
+                .waitForPageLoaded();
 
-        step("Verify that detail is visible: product name, category, price, availability, condition, brand", () -> {
-            softAssert.assertThat(product.isProductInformationVisible("Product name, Category, Price, Availability, Condition, Brand"))
-                    .as("All details are visible")
-                    .isTrue();
+        step("Verify that detail is visible: product name, category, price, availability, condition, brand", () ->
+
+        {
+            softAssert.assertThat(product.isProductNameVisible("Blue Top"))
+                    .as("Category should be visible").isTrue();
+            softAssert.assertThat(product.isProductInformationVisible("Category"))
+                    .as("Category should be visible").isTrue();
+            softAssert.assertThat(product.isProductInformationVisible("Rs."))
+                    .as("Rs. should be visible").isTrue();
+            softAssert.assertThat(product.isProductInformationVisible("Availability"))
+                    .as("Availability should be visible").isTrue();
+            softAssert.assertThat(product.isProductInformationVisible("Condition"))
+                    .as("Condition should be visible").isTrue();
+            softAssert.assertThat(product.isProductInformationVisible("Brand"))
+                    .as("Brand should be visible").isTrue();
         });
 
         softAssert.assertAll();
-
-
-
-
-
-
-
     }
 }

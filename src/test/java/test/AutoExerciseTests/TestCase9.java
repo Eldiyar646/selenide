@@ -20,9 +20,9 @@ import static io.qameta.allure.Allure.step;
 public class TestCase9 extends BaseTest {
 
     @Test
-    @Order(8)
+    @Order(9)
     @Owner("Eldiyar")
-    @DisplayName("Search Producte")
+    @DisplayName("Search Product")
     @Severity(SeverityLevel.BLOCKER)
     void searchProductTest() {
         var softAssert = new SoftAssertions();
@@ -32,7 +32,7 @@ public class TestCase9 extends BaseTest {
 
         step("Verify that home page is visible successfully", () -> {
             softAssert.assertThat(home.isPageTabActive("Home"))
-                    .as("Home tab should be active")
+                    .as("Home page is loaded and visible successfully")
                     .isTrue();
         });
 
@@ -40,27 +40,27 @@ public class TestCase9 extends BaseTest {
                 .waitForPageLoaded();
 
         step("Verify user is navigated to ALL PRODUCTS page successfully", () -> {
-            softAssert.assertThat(product.isTitleVisible("All products"))
-                    .as("All products title should be visible")
-                    .isTrue();
+            softAssert.assertThat(product.titlesInAllPages("All Products"))
+                    .as("'All Products' title should be visible")
+                    .isEqualToIgnoringCase("All Products");
         });
 
         var search = product
-                .searchProduct("Tie");
+                .inputSearchProduct("Blue Top")
+                        .clickSearchProduct();
 
         step("Verify 'SEARCHED PRODUCTS' is visible", () -> {
-            softAssert.assertThat(product.isTitleVisible("Searched Products"))
-                    .as("Searched Products are visible")
-                    .isTrue();
+            softAssert.assertThat(search.titlesInAllPages("Searched Products"))
+                    .as("'SEARCHED PRODUCTS' title should be visible")
+                    .isEqualToIgnoringCase("Searched Products");
         });
 
-        step("Verify Searched Products is visible", () -> {
-            softAssert.assertThat(product.isAllRelatedProductVisible())
-                    .as("Products should be visible after search")
+        step("Verify searched products are visible", () -> {
+            softAssert.assertThat(search.isAllRelatedProductVisible())
+                    .as("All related products should be visible")
                     .isTrue();
         });
 
         softAssert.assertAll();
-
     }
 }

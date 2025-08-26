@@ -33,9 +33,5 @@ public class CartPage extends BasePage<CartPage> {
         }).toList();
     }
 
-    @Override
-    protected ElementsCollection getTitles() {
-        return null;
-    }
 }
 

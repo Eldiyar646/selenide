@@ -21,11 +21,6 @@ public class TestCasePage extends BasePage<TestCasePage> {
         return this;
     }
 
-    @Override
-    protected ElementsCollection getTitles() {
-        return titlesInAllPages;
-    }
-
     public String getLinkValue(String title) {
         var testCases = listOfTestCases
                 .find(Condition.partialText(title));

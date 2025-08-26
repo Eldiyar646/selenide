@@ -35,7 +35,7 @@ public class TestCase13 extends BaseTest {
 
         step("Verify that home page is visible successfully", () -> {
             softAssert.assertThat(home.isPageTabActive("Home"))
-                    .as("Home tab should be active")
+                    .as("Home page is loaded and visible successfully")
                     .isTrue();
         });
 

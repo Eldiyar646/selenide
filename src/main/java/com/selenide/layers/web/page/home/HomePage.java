@@ -1,11 +1,10 @@
 package com.selenide.layers.web.page.home;
 
 import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.ElementsCollection;
 import com.selenide.layers.web.page.BasePage;
 import com.selenide.layers.web.page.cart.CartPage;
 import com.selenide.layers.web.page.contactUs.ContactUsFormPage;
-import com.selenide.layers.web.page.deleteAccount.DeleteAccount;
+import com.selenide.layers.web.page.createDeleteAccount.DeleteAccount;
 import com.selenide.layers.web.page.productsPage.ProductsPage;
 import com.selenide.layers.web.page.signup.SignUpPage;
 import com.selenide.layers.web.page.testCases.TestCasePage;
@@ -27,20 +26,13 @@ public class HomePage extends BasePage<HomePage> {
         return this;
     }
 
-    @Step("Scroll down to footer")
-    public HomePage subscriptionTitle() {
-        $(byText("Subscription")).scrollIntoView(true)
-                .shouldHave(text("Subscription"));
-        return this;
-    }
-
     @Step("Click signup/login tab")
     public SignUpPage clickSignUpLoginTab() {
         clickNavBarTab("Signup / Login");
         return page(SignUpPage.class);
     }
 
-    @Step("Click Delete Account tab{0}")
+    @Step("Click Delete Account tab")
     public DeleteAccount clickDeletedAccountTab() {
         clickNavBarTab("Delete Account");
         return page(DeleteAccount.class);
@@ -76,15 +68,17 @@ public class HomePage extends BasePage<HomePage> {
         return page(CartPage.class);
     }
 
+    @Step("Scroll down to footer")
+    public HomePage subscriptionTitle() {
+        $(byText("Subscription")).scrollIntoView(true)
+                .shouldHave(text("Subscription"));
+        return this;
+    }
+
     @Step("Check Logged in as banner visible{0}")
     public String getLoggedInBannerText() {
         return navBarElements.find(Condition.partialText("Logged in as"))
                 .getText();
-    }
-
-    @Override
-    protected ElementsCollection getTitles() {
-        return null;
     }
 
 

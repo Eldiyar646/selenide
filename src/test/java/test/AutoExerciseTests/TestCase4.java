@@ -2,16 +2,13 @@ package test.AutoExerciseTests;
 
 import base.BaseTest;
 import com.selenide.layers.web.page.home.HomePage;
-import io.qameta.allure.Description;
-import io.qameta.allure.Owner;
-import io.qameta.allure.Severity;
+import io.qameta.allure.*;
 import io.qameta.allure.SeverityLevel;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
+import org.assertj.core.api.SoftAssertions;
+import org.junit.jupiter.api.*;
 import test.Tags;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static io.qameta.allure.Allure.step;
 
 @Tag(Tags.SMOKE)
 @Tag(Tags.WEB)
@@ -25,37 +22,50 @@ public class TestCase4 extends BaseTest {
     @Severity(SeverityLevel.BLOCKER)
     void logOutTest() {
 
+        var softAssert = new SoftAssertions();
+
         var home = open(HomePage.class)
                 .waitForPageLoaded();
 
-        assertThat(home.isPageTabActive("Home"))
-                .as("Home tab should be active")
-                .isTrue();
+        step("Verify that home page is visible successfully", () -> {
+            softAssert.assertThat(home.isPageTabActive("Home"))
+                    .as("Home page is loaded and visible successfully")
+                    .isTrue();
+        });
 
         var login = home
                 .clickSignUpLoginTab()
                 .waitForPageLoaded();
 
-        assertThat(login.isTitleVisible("Login to your account"))
-                .as("'Login to your account' should be visible")
-                .isTrue();
+        step("Verify 'Login to your account' is visible", () -> {
+            softAssert.assertThat(login.titlesInAllPages("Login to your account"))
+                    .as("'Login to your account' is visible")
+                    .isEqualTo("Login to your account");
+        });
 
         var afterLogin = login
                 .inputLoginEmail("1@3.2")
                 .inputLoginPassword("1")
                 .clickLoginButton();
 
-        var homeAfterContinue = afterLogin.waitForPageLoaded();
+        var homeAfterContinue = afterLogin
+                .waitForPageLoaded();
 
         String banner = homeAfterContinue.getLoggedInBannerText();
-        assertThat(banner)
-                .isEqualTo("Logged in as 1");
+        step("Verify that 'Logged in as username' is visible", () -> {
+            softAssert.assertThat(banner)
+                    .isEqualTo("Logged in as 1");
+        });
 
         var logout = homeAfterContinue
                 .clickLogOutTab().waitForPageLoaded();
 
-        assertThat(logout.isPageTabActive("Signup / Login")).
-                as("User is navigated to login page")
-                .isTrue();
+        step("Verify that user is navigated to login page", () -> {
+            softAssert.assertThat(logout.isPageTabActive("Signup / Login")).
+                    as("User is navigated to login page")
+                    .isTrue();
+        });
+
+        softAssert.assertAll();
     }
 }
