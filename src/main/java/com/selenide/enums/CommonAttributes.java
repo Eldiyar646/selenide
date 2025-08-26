@@ -1,6 +1,5 @@
-import lombok.Getter;
+package com.selenide.enums;
 
-@Getter
 public enum CommonAttributes {
 
     CLASS("class"),
