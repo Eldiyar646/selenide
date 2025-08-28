@@ -8,6 +8,7 @@ import io.qameta.allure.selenide.AllureSelenide;
 import lombok.Getter;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
+
 @Getter
 
 public class BaseTest {
@@ -21,8 +22,6 @@ public class BaseTest {
 
     @BeforeAll
     static void setup() {
-        WebDriverManager.configureBasicWebDriver();
-
         Configuration.timeout = 10000;
         Configuration.pageLoadTimeout = 60000;
         Configuration.headless = false;

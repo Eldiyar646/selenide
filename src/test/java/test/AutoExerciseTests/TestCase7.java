@@ -2,25 +2,24 @@ package test.AutoExerciseTests;
 
 import base.BaseTest;
 import com.selenide.layers.web.page.home.HomePage;
-import io.qameta.allure.Allure;
+
 import io.qameta.allure.Owner;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Order;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Test;
-import test.Tags;
+import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
+import test.utils.TestRailCaseId;
+import test.utils.TestRailExtension;
+
 
 import static io.qameta.allure.Allure.step;
 
-@Tag(Tags.SMOKE)
-@Tag(Tags.WEB)
-
+@ExtendWith(TestRailExtension.class)
 public class TestCase7 extends BaseTest {
 
     @Test
+    @TestRailCaseId("C1")
     @Order(7)
     @Owner("Eldiyar")
     @DisplayName("Verify Test Cases Page")
@@ -49,6 +48,7 @@ public class TestCase7 extends BaseTest {
         });
 
         softAssert.assertAll();
+
     }
 }
 
