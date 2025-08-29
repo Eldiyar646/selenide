@@ -54,7 +54,7 @@ public class TestCase11 extends BaseTest {
         step("Verify success message You have been successfully subscribed! is visible", () -> {
             softAssert.assertThat(home.isSubscriptionAlertVisible())
                     .as("You have been successfully subscribed! is visible")
-                    .isTrue();
+                    .isEqualTo("You have been successfully subscribed!");
         });
 
         softAssert.assertAll();

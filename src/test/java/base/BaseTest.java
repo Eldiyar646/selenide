@@ -3,7 +3,6 @@ package base;
 import com.codeborne.selenide.Configuration;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.logevents.SelenideLogger;
-import com.selenide.layers.web.manager.WebDriverManager;
 import io.qameta.allure.selenide.AllureSelenide;
 import lombok.Getter;
 import org.junit.jupiter.api.AfterAll;

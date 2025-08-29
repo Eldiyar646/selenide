@@ -24,6 +24,14 @@ public enum ElementsOnPage {
     SEARCH("search_product"),
     SUBSCRIPTION("susbscribe_email"),
     QUANTITY("quantity"),
+
+    NAME_ON_CARD("name-on-card"),
+    CARD_NUMBER("card-number"),
+    CVC("cvc"),
+    EXPIRE_MONTH("expiry-month"),
+    EXPIRE_YEAR("expiry-year"),
+    SUBMIT("submit"),
+
     ;
 
     private final String value;
@@ -37,7 +45,7 @@ public enum ElementsOnPage {
     }
 
     public SelenideElement getElementById() {
-        return $x("//input[@id='" + value + "']").shouldBe(Condition.visible);
+        return $x("//*[@id='" + value + "']").shouldBe(Condition.visible);
     }
 
 

@@ -10,6 +10,7 @@ import com.selenide.layers.web.manager.ElementManager;
 import com.selenide.layers.web.page.cart.CartPage;
 import com.selenide.layers.web.page.home.HomePage;
 import com.selenide.layers.web.page.productsPage.ProductDetailPage;
+import com.selenide.layers.web.page.productsPage.ProductsPage;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
@@ -102,6 +103,26 @@ public abstract class BasePage<T extends BasePage> {
         return page(CartPage.class);
     }
 
+    @SuppressWarnings("unchecked")
+    protected T self(){
+        return (T) this;
+    }
+
+    protected <P extends BasePage<P>> P goTo(Class<P> pageClass) {
+        return page(pageClass);
+    }
+
+    public T clickAddToCart(String title) {
+        elementManager.click($(byText("Add to cart")));
+        return self();
+    }
+
+    @Step("Click continue shopping link")
+    public T clickContinue() {
+        elementManager.click($(byText("Continue Shopping")));
+        return self();
+    }
+
     @Step("Wait products list will visible")
     public boolean isProductsListVisible() {
         return ($x("//div[@class='features_items']").has(visible));
@@ -118,6 +139,8 @@ public abstract class BasePage<T extends BasePage> {
                 .shouldBe(Condition.visible)
                 .getText();
     }
+
+
 
 }
 

@@ -6,9 +6,8 @@ import com.selenide.layers.web.page.BasePage;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
-import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.$;
-import static com.codeborne.selenide.Selenide.page;
+
 
 public class ProductsPage extends BasePage<ProductsPage> {
 
@@ -39,12 +38,6 @@ public class ProductsPage extends BasePage<ProductsPage> {
         var addButton = product.$("a.add-to-cart");
         elementManager.click(addButton);
         return this;
-    }
-
-    @Step("Click continue shopping link")
-    public ProductsPage clickContinue() {
-        elementManager.click($(byText("Continue Shopping")));
-        return page(ProductsPage.class);
     }
 }
 

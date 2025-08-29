@@ -4,6 +4,7 @@ import com.codeborne.selenide.Condition;
 import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
 import com.codeborne.selenide.SelenideElement;
+import com.selenide.data.UserData;
 import com.selenide.enums.ElementsOnPage;
 import com.selenide.enums.ElementsQa;
 import com.selenide.layers.web.page.BasePage;
@@ -23,8 +24,6 @@ import static com.codeborne.selenide.Selenide.$x;
 
 
 public class SignUpPage extends BasePage<SignUpPage> {
-    Faker faker = new Faker();
-
 
     @Override
     public SignUpPage waitForPageLoaded() {
@@ -33,7 +32,6 @@ public class SignUpPage extends BasePage<SignUpPage> {
         pageTab.shouldHave(Condition.attribute("style", "color: orange;"));
         return this;
     }
-
 
     @Step("Enter SignUp name")
     public SignUpPage inputSignUpName(String name) {
@@ -87,12 +85,10 @@ public class SignUpPage extends BasePage<SignUpPage> {
     }
 
     @Step("Enter password")
-    public SignUpPage inputPassword() {
-        var fakePassword = faker.internet().password();
+    public SignUpPage inputPassword(String password) {
         elementManager
                 .inputOnlyElement(ElementsOnPage
-                        .PASSWORD.getElementFromAccount()
-                        .setValue(fakePassword));
+                        .PASSWORD.getElementFromAccount().setValue(password));
         return this;
     }
 
@@ -127,99 +123,82 @@ public class SignUpPage extends BasePage<SignUpPage> {
     }
 
     @Step("Enter user first name")
-    public SignUpPage inputUserFirstName() {
-        var fakeFirstName = faker.name().firstName();
+    public SignUpPage inputUserFirstName(UserData user) {
         elementManager
                 .inputOnlyElement(ElementsOnPage
                         .FIRST_NAME.getElementFromAccount()
-                        .setValue(fakeFirstName));
+                        .setValue(user.getFirstName()));
         return this;
     }
 
     @Step("Enter user last name")
-    public SignUpPage inputUserLastName() {
-        var fakeLastName = faker.name().lastName();
+    public SignUpPage inputUserLastName(UserData user) {
         elementManager
                 .inputOnlyElement(ElementsOnPage
                         .LAST_NAME.getElementFromAccount()
-                        .setValue(fakeLastName));
+                        .setValue(user.getLastName()));
         return this;
     }
 
     @Step("Enter company name")
-    public SignUpPage inputCompanyName() {
-        var fakeCompany = faker.company().name();
-        elementManager
-                .inputOnlyElement(ElementsOnPage
+    public SignUpPage inputCompanyName(UserData user) {
+        elementManager.inputOnlyElement(ElementsOnPage
                         .COMPANY.getElementFromAccount()
-                        .setValue(fakeCompany));
+                        .setValue(user.getCompanyName()));
         return this;
     }
 
     @Step("Enter first address")
-    public SignUpPage inputUserAddress1() {
-        var fakeFirstAddress = faker.address().fullAddress();
-        elementManager
-                .inputOnlyElement(ElementsOnPage
+    public SignUpPage inputUserAddress1(UserData user) {
+        elementManager.inputOnlyElement(ElementsOnPage
                         .FIRST_ADDRESS.getElementFromAccount()
-                        .setValue(fakeFirstAddress));
+                        .setValue(user.getAddress1()));
         return this;
     }
 
     @Step("Enter second address")
-    public SignUpPage inputUserAddress2() {
-        var fakeSecondAddress = faker.address().secondaryAddress();
-        elementManager
-                .inputOnlyElement(ElementsOnPage
+    public SignUpPage inputUserAddress2(UserData user) {
+        elementManager.inputOnlyElement(ElementsOnPage
                         .SECOND_ADDRESS.getElementFromAccount()
-                        .setValue(fakeSecondAddress));
+                        .setValue(user.getAddress2()));
         return this;
     }
 
     @Step("Enter user country")
     public SignUpPage inputUserCountry() {
-        elementManager
-                .select(ElementsOnPage
+        elementManager.select(ElementsOnPage
                         .COUNTRY.getElementFromAccount(), "United States");
         return this;
     }
 
     @Step("Enter user state")
-    public SignUpPage inputUserState() {
-        var fakeState = faker.address().state();
-        elementManager
-                .inputOnlyElement(ElementsOnPage
+    public SignUpPage inputUserState(UserData user) {
+        elementManager.inputOnlyElement(ElementsOnPage
                         .STATE.getElementFromAccount()
-                        .setValue(fakeState));
+                        .setValue(user.getState()));
         return this;
     }
 
     @Step("Enter user city")
-    public SignUpPage inputUserCity() {
-        var fakeCity = faker.address().city();
-        elementManager
-                .inputOnlyElement(ElementsOnPage
+    public SignUpPage inputUserCity(UserData user) {
+        elementManager.inputOnlyElement(ElementsOnPage
                         .CITY.getElementFromAccount()
-                        .setValue(fakeCity));
+                        .setValue(user.getCity()));
         return this;
     }
 
     @Step("Enter user zipcode")
-    public SignUpPage inputUserZipCode() {
-        var fakeZipCode = faker.address().zipCode();
-        elementManager
-                .inputOnlyElement(ElementsOnPage
-                        .ZIP_CODE.getElementFromAccount().setValue(fakeZipCode));
+    public SignUpPage inputUserZipCode(UserData user) {
+        elementManager.inputOnlyElement(ElementsOnPage
+                        .ZIP_CODE.getElementFromAccount().setValue(user.getZipCode()));
         return this;
     }
 
     @Step("Enter user phone number")
-    public SignUpPage inputUserMobilePhone() {
-        var fakePhone = faker.phoneNumber().phoneNumber();
-        elementManager
-                .inputOnlyElement(ElementsOnPage
+    public SignUpPage inputUserMobilePhone(UserData user) {
+        elementManager.inputOnlyElement(ElementsOnPage
                         .PHONE.getElementFromAccount()
-                        .setValue(fakePhone));
+                        .setValue(user.getPhone()));
         return this;
     }
 

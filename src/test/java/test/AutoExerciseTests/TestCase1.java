@@ -1,6 +1,7 @@
 package test.AutoExerciseTests;
 
 import base.BaseTest;
+import com.selenide.data.UserData;
 import com.selenide.layers.web.page.home.HomePage;
 import io.qameta.allure.*;
 import io.qameta.allure.SeverityLevel;
@@ -16,6 +17,7 @@ import static io.qameta.allure.Allure.step;
 
 public class TestCase1 extends BaseTest {
     Faker faker = new Faker();
+    UserData user = new UserData();
 
     @Test
     @Order(1)
@@ -23,6 +25,17 @@ public class TestCase1 extends BaseTest {
     @DisplayName("Register User")
     @Severity(SeverityLevel.BLOCKER)
     void registerTest() {
+
+        user.setFirstName(faker.name().firstName());
+        user.setLastName(faker.name().lastName());
+        user.setCompanyName(faker.company().name());
+        user.setAddress1(faker.address().streetAddress());
+        user.setAddress2(faker.address().secondaryAddress());
+        user.setCountry("United States");
+        user.setState(faker.address().state());
+        user.setCity(faker.address().city());
+        user.setZipCode(faker.address().zipCode());
+        user.setPhone(faker.phoneNumber().cellPhone());
 
         var softAssert = new SoftAssertions();
 
@@ -62,14 +75,14 @@ public class TestCase1 extends BaseTest {
         });
 
         var accountCreated = afterSignup.waitForPageLoaded()
-                .chooseTitle("Mr").inputPassword()
+                .chooseTitle("Mr").inputPassword("123")
                 .markCheckBoxes(true, true)
                 .selectRandomDateMonthYear()
-                .inputUserFirstName().inputUserLastName()
-                .inputCompanyName().inputUserAddress1()
-                .inputUserAddress2().inputUserCountry()
-                .inputUserState().inputUserCity()
-                .inputUserZipCode().inputUserMobilePhone()
+                .inputUserFirstName(user).inputUserLastName(user)
+                .inputCompanyName(user).inputUserAddress1(user)
+                .inputUserAddress2(user).inputUserCountry()
+                .inputUserState(user).inputUserCity(user)
+                .inputUserZipCode(user).inputUserMobilePhone(user)
                 .clickCreateAccountButton().waitForPageLoaded();
 
         step("Verify that 'Account Created!' is visible", () -> {
