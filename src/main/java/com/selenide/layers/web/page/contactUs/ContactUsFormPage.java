@@ -16,6 +16,7 @@ import static com.codeborne.selenide.Selenide.*;
 
 public class ContactUsFormPage extends BasePage<ContactUsFormPage> {
     Faker faker = new Faker();
+    File file = new File("src/test/resources/i.webp");
 
     @Override
     public ContactUsFormPage waitForPageLoaded() {
@@ -56,7 +57,7 @@ public class ContactUsFormPage extends BasePage<ContactUsFormPage> {
     @Step("Upload file from PC")
     public ContactUsFormPage uploadFile() {
         $x("//input[@name='upload_file']")
-                .uploadFile(new File("C://Users//PC-User//Pictures//i.webp"));
+                .uploadFile(file);
         return this;
     }
 
