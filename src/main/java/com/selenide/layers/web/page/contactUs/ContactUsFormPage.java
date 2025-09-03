@@ -1,7 +1,6 @@
 package com.selenide.layers.web.page.contactUs;
 
 import com.codeborne.selenide.Condition;
-import com.codeborne.selenide.ElementsCollection;
 import com.codeborne.selenide.Selenide;
 import com.selenide.enums.ElementsQa;
 import com.selenide.layers.web.page.BasePage;

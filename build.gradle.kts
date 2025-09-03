@@ -54,11 +54,11 @@ dependencies {
     implementation("io.github.bonigarcia:webdrivermanager:6.1.0")
 
     // Зависимости для тестов
-    testImplementation("io.qameta.allure:allure-selenide:$allureVersion")
+    implementation("io.qameta.allure:allure-selenide:2.29.1")
     testImplementation("org.assertj:assertj-core:$assertjVersion")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    testImplementation("io.qameta.allure:allure-junit5:$allureVersion")
+    testImplementation("io.qameta.allure:allure-junit5:2.29.1")
 
     implementation("net.datafaker:datafaker:2.2.2")
     implementation("org.aeonbits.owner:owner:$ownerVersion")
