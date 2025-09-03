@@ -56,7 +56,7 @@ public class TestCase4 extends BaseTest {
                         .isEqualTo("Login to your account");
 
                 var afterLogin = login
-                        .inputLoginEmail("10@10.10")
+                        .inputLoginEmail("01@02.03")
                         .inputLoginPassword("1")
                         .clickLoginButton();
 

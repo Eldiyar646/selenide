@@ -7,10 +7,13 @@ import io.qameta.allure.SeverityLevel;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
+import test.Tags;
 import test.utils.TestRailCaseId;
 import test.utils.TestRailExtension;
 
 import static io.qameta.allure.Allure.step;
+
+@Tag(Tags.SMOKE)
 
 @ExtendWith(TestRailExtension.class)
 public class TestCase7 extends BaseTest {
