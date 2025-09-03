@@ -35,11 +35,10 @@ pipeline {
         stage('Run Tests') {
             steps {
                 script {
-                    // Вызываем конкретную задачу SmokeTest или RegressionTest
                     def taskName = "${params.TEST_SUITE}Test"
                     echo "Запускаем Gradle задачу: ${taskName}"
 
-                    // Выполняем Gradle и не падаем сразу
+                    // Выполняем Gradle и возвращаем статус
                     def status = sh(
                         script: "./gradlew ${params.CLEAN ? 'clean ' : ''}${taskName} --no-daemon --info --continue",
                         returnStatus: true
@@ -48,6 +47,12 @@ pipeline {
                     // Если есть ошибки тестов, помечаем билд как UNSTABLE
                     currentBuild.result = (status == 0) ? 'SUCCESS' : 'UNSTABLE'
                 }
+            }
+        }
+
+        stage('Generate Allure Report') {
+            steps {
+                sh './gradlew allureReport --no-daemon --info'
             }
         }
 
