@@ -72,7 +72,7 @@ tasks.register<Test>("SmokeTest") {
     group = "verification"
     description = "Runs tests tagged with @Tag(Tags.SMOKE)"
     useJUnitPlatform {
-        includeTags("SMOKE")
+        includeTags("Smoke") // <-- строка совпадает с Tags.SMOKE
     }
     reports {
         junitXml.required.set(true)
@@ -87,7 +87,7 @@ tasks.register<Test>("RegressionTest") {
     group = "verification"
     description = "Runs tests tagged with @Tag(Tags.REGRESSION)"
     useJUnitPlatform {
-        includeTags("REGRESSION")
+        includeTags("Regression") // <-- строка совпадает с Tags.REGRESSION
     }
     reports {
         junitXml.required.set(true)
@@ -97,5 +97,4 @@ tasks.register<Test>("RegressionTest") {
     }
     systemProperty("allure.results.directory", "$buildDir/allure-results")
 }
-
 

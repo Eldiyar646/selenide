@@ -27,23 +27,24 @@ pipeline {
 
         stage('Tests') {
             steps {
-                ansiColor('xterm') {
-                    sh """
-                        chmod +x gradlew
-                        ./gradlew ${params.CLEAN ? 'clean ' : ''}${params.TEST_SUITE}Test --no-daemon
-                    """
-                }
+                // Проверяем права и запускаем соответствующую задачу Gradle
+                sh 'chmod +x gradlew'
+                sh """
+                    ./gradlew ${params.CLEAN ? 'clean ' : ''}${params.TEST_SUITE}Test --no-daemon --info
+                """
             }
         }
     }
 
     post {
         always {
-            // Берем отчёты из папки соответствующей задачи
+            // JUnit отчёты для соответствующей задачи
             junit allowEmptyResults: true, testResults: "build/test-results/${params.TEST_SUITE}/*.xml"
-            // Allure
+
+            // Allure отчёты
             allure includeProperties: false, jdk: '', results: [[path: 'build/allure-results']]
-            // HTML
+
+            // HTML отчёты Gradle
             archiveArtifacts artifacts: "build/reports/tests/${params.TEST_SUITE}/**", allowEmptyArchive: true
         }
     }
