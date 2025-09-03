@@ -52,13 +52,17 @@ dependencies {
     implementation("com.codeborne:selenide-selenoid:$selenideVersion")
     implementation("org.projectlombok:lombok:$lombokVersion")
     implementation("io.github.bonigarcia:webdrivermanager:6.1.0")
+
+    // Зависимости для тестов
     testImplementation("io.qameta.allure:allure-selenide:$allureVersion")
-    implementation("org.assertj:assertj-core:$assertjVersion")
-    implementation(platform("org.junit:junit-bom:5.10.0"))
-    implementation("org.junit.jupiter:junit-jupiter")
-    implementation("io.qameta.allure:allure-junit5:$allureVersion")
+    testImplementation("org.assertj:assertj-core:$assertjVersion")
+    testImplementation(platform("org.junit:junit-bom:5.10.0"))
+    testImplementation("org.junit.jupiter:junit-jupiter")
+    testImplementation("io.qameta.allure:allure-junit5:$allureVersion")
+
     implementation("net.datafaker:datafaker:2.2.2")
     implementation("org.aeonbits.owner:owner:$ownerVersion")
+
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
 }
