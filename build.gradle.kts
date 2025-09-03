@@ -36,6 +36,8 @@ allure {
 
 repositories {
     mavenCentral()
+    google()
+    maven("https://repo.maven.apache.org/maven2/")
 }
 
 val allureVersion = "2.25.0"
@@ -43,11 +45,17 @@ val ownerVersion = "1.0.9"
 val assertjVersion = "3.22.0"
 val lombokVersion = "1.18.30"
 val selenideVersion = "7.8.1"
+val seleniumVersion = "4.11.0"  // стабильная версия, доступная на Maven Central
 
 dependencies {
     testImplementation("org.slf4j:slf4j-simple:2.0.12")
     implementation("org.slf4j:slf4j-api:2.0.17")
-    testImplementation("org.seleniumhq.selenium:selenium-devtools-v120:4.32.0")
+
+    // Selenium (заменяем devtools-v120 на стабильную версию, которая точно качается)
+    testImplementation("org.seleniumhq.selenium:selenium-java:$seleniumVersion")
+    testImplementation("org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion")
+    testImplementation("org.seleniumhq.selenium:selenium-devtools-v140:$seleniumVersion")
+
     implementation("org.json:json:20230227")
     implementation("org.aspectj:aspectjtools:1.9.22")
     implementation("org.aspectj:aspectjweaver:1.9.22")
@@ -62,6 +70,7 @@ dependencies {
     implementation("io.qameta.allure:allure-junit5:$allureVersion")
     implementation("net.datafaker:datafaker:2.2.2")
     implementation("org.aeonbits.owner:owner:$ownerVersion")
+
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
 }
