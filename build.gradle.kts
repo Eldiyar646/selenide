@@ -45,10 +45,9 @@ val lombokVersion = "1.18.30"
 val selenideVersion = "7.8.1"
 
 dependencies {
-    testImplementation("org.seleniumhq.selenium:selenium-devtools:4.32.0")
     testImplementation("org.slf4j:slf4j-simple:2.0.12")
     implementation("org.slf4j:slf4j-api:2.0.17")
-    implementation("org.seleniumhq.selenium:selenium-devtools-v134:4.32.0")
+    testImplementation("org.seleniumhq.selenium:selenium-devtools-v120:4.32.0")
     implementation("org.json:json:20230227")
     implementation("org.aspectj:aspectjtools:1.9.22")
     implementation("org.aspectj:aspectjweaver:1.9.22")
