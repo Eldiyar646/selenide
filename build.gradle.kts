@@ -1,5 +1,13 @@
+
+group = "com.selenide"
+version = "1.0-SNAPSHOT"
+
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
+}
+
+val allureClean by tasks.registering(Delete::class) {
+    delete("allure-results", "allure-report")
 }
 
 plugins {
@@ -8,17 +16,11 @@ plugins {
     id("io.qameta.allure") version "2.9.4"
     id("org.gradle.test-retry") version "1.6.2"
 }
-
-val allureClean by tasks.registering(Delete::class) {
-    delete("allure-results", "allure-report")
-}
-
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
-
 allure {
     report {
         version.set("2.25.0")
@@ -33,29 +35,17 @@ allure {
         }
     }
 }
-
 repositories {
     mavenCentral()
-    google()
 }
-
-val allureVersion = "2.25.0"
+val allureVersion = "2.29.1"
 val ownerVersion = "1.0.9"
+val jacksonVersion = "2.17.0"
 val assertjVersion = "3.22.0"
 val lombokVersion = "1.18.30"
+val slf4jVersion = "2.0.16"
 val selenideVersion = "7.8.1"
-val seleniumVersion = "4.32.0"  // версия, где точно есть devtools-v140
-
 dependencies {
-    testImplementation("org.slf4j:slf4j-simple:2.0.12")
-    implementation("org.slf4j:slf4j-api:2.0.17")
-
-    // Selenium
-    testImplementation("org.seleniumhq.selenium:selenium-java:$seleniumVersion")
-    testImplementation("org.seleniumhq.selenium:selenium-chrome-driver:$seleniumVersion")
-    testImplementation("org.seleniumhq.selenium:selenium-devtools-v140:$seleniumVersion")
-
-    implementation("org.json:json:20230227")
     implementation("org.aspectj:aspectjtools:1.9.22")
     implementation("org.aspectj:aspectjweaver:1.9.22")
     implementation("com.codeborne:selenide:$selenideVersion")
@@ -69,42 +59,26 @@ dependencies {
     implementation("io.qameta.allure:allure-junit5:$allureVersion")
     implementation("net.datafaker:datafaker:2.2.2")
     implementation("org.aeonbits.owner:owner:$ownerVersion")
-
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
 }
-
-tasks.withType<Test>().configureEach {
+tasks.test {
     useJUnitPlatform()
-    systemProperty("allure.results.directory", "$buildDir/allure-results")
 }
-
-// Задача для Smoke тестов
-tasks.register<Test>("SmokeTest") {
+// Отдельная задача для запуска только тестов с @Tag("Smoke")
+tasks.register<Test>("smokeTest") {
     group = "verification"
-    description = "Runs tests tagged with @Tag(Tags.SMOKE)"
+    description = "Runs tests tagged with @Tag(\"Smoke\")"
     useJUnitPlatform {
         includeTags("Smoke")
     }
-    reports {
-        junitXml.required.set(true)
-        junitXml.outputLocation.set(layout.buildDirectory.dir("test-results/SmokeTest"))
-        html.required.set(true)
-        html.outputLocation.set(layout.buildDirectory.dir("reports/tests/SmokeTest"))
-    }
 }
 
-// Задача для Regression тестов
-tasks.register<Test>("RegressionTest") {
+// Отдельная задача для запуска только тестов с @Tag("Smoke")
+tasks.register<Test>("regressionTest") {
     group = "verification"
-    description = "Runs tests tagged with @Tag(Tags.REGRESSION)"
+    description = "Runs tests tagged with @Tag(\"Regression\")"
     useJUnitPlatform {
         includeTags("Regression")
-    }
-    reports {
-        junitXml.required.set(true)
-        junitXml.outputLocation.set(layout.buildDirectory.dir("test-results/RegressionTest"))
-        html.required.set(true)
-        html.outputLocation.set(layout.buildDirectory.dir("reports/tests/RegressionTest"))
     }
 }
