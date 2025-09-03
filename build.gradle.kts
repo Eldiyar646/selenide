@@ -1,13 +1,13 @@
 tasks.withType<JavaCompile>().configureEach {
     options.encoding = "UTF-8"
 }
+
 plugins {
     id("java")
     id("io.freefair.lombok") version "8.4"
     id("io.qameta.allure") version "2.9.4"
     id("org.gradle.test-retry") version "1.6.2"
 }
-
 
 val allureClean by tasks.registering(Delete::class) {
     delete("allure-results", "allure-report")
@@ -18,6 +18,7 @@ java {
         languageVersion.set(JavaLanguageVersion.of(21))
     }
 }
+
 allure {
     report {
         version.set("2.25.0")
@@ -36,12 +37,11 @@ allure {
 repositories {
     mavenCentral()
 }
+
 val allureVersion = "2.25.0"
 val ownerVersion = "1.0.9"
-val jacksonVersion = "2.17.0"
 val assertjVersion = "3.22.0"
 val lombokVersion = "1.18.30"
-val slf4jVersion = "2.0.17"
 val selenideVersion = "7.8.1"
 
 dependencies {
@@ -64,15 +64,18 @@ dependencies {
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
 }
+
 tasks.test {
     useJUnitPlatform()
+    systemProperty("allure.results.directory", "$buildDir/allure-results")
 }
 
+// Задача для Smoke тестов
 tasks.register<Test>("SmokeTest") {
     group = "verification"
     description = "Runs tests tagged with @Tag(Tags.SMOKE)"
     useJUnitPlatform {
-        includeTags("Smoke") // <-- строка совпадает с Tags.SMOKE
+        includeTags("Smoke") // Совпадает с Tags.SMOKE
     }
     reports {
         junitXml.required.set(true)
@@ -83,11 +86,12 @@ tasks.register<Test>("SmokeTest") {
     systemProperty("allure.results.directory", "$buildDir/allure-results")
 }
 
+// Задача для Regression тестов
 tasks.register<Test>("RegressionTest") {
     group = "verification"
     description = "Runs tests tagged with @Tag(Tags.REGRESSION)"
     useJUnitPlatform {
-        includeTags("Regression") // <-- строка совпадает с Tags.REGRESSION
+        includeTags("Regression") // Совпадает с Tags.REGRESSION
     }
     reports {
         junitXml.required.set(true)
@@ -97,4 +101,3 @@ tasks.register<Test>("RegressionTest") {
     }
     systemProperty("allure.results.directory", "$buildDir/allure-results")
 }
-

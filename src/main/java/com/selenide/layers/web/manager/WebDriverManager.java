@@ -1,11 +1,12 @@
 package com.selenide.layers.web.manager;
 
-import static com.codeborne.selenide.Configuration.browser;
-import static com.codeborne.selenide.Configuration.headless;
+import com.codeborne.selenide.Configuration;
+
 
 public class WebDriverManager {
 
-        public static void configureBasicWebDriver() {
-            browser = "chrome";
+    public static void configureBasicWebDriver() {
+        Configuration.browser = "chrome";
+        Configuration.headless = Boolean.parseBoolean(System.getProperty("HEADLESS", "true"));
     }
 }

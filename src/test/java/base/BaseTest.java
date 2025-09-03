@@ -16,8 +16,7 @@ import java.util.Properties;
 
 public class BaseTest {
 
-    private static String BASE_URL;
-    private static boolean HEADLESS;
+    private final String BASE_URL = System.getProperty("BASE_URL", "https://automationexercise.com");
 
     public <T> T open(Class<T> clazz) {
         return Selenide.open(BASE_URL, clazz);
@@ -25,42 +24,18 @@ public class BaseTest {
 
     @BeforeAll
     static void setup() {
-        loadProperties();
-
-        Configuration.browser = "chrome";
-        Configuration.headless = HEADLESS;
+        // Настройки Selenide
         Configuration.timeout = 10000;
         Configuration.pageLoadTimeout = 60000;
+        Configuration.headless = Boolean.parseBoolean(System.getProperty("HEADLESS", "true"));
         Configuration.pageLoadStrategy = "eager";
+        Configuration.browser = "chrome";
 
-        // уникальный профиль Chrome для CI
-        Configuration.browserCapabilities.setCapability("goog:chromeOptions",
-                new org.openqa.selenium.chrome.ChromeOptions()
-                        .addArguments("--disable-dev-shm-usage")
-                        .addArguments("--no-sandbox")
-                        .addArguments("--window-size=1366,768")
-                        .addArguments("--user-data-dir=/tmp/chrome-profile-" + System.currentTimeMillis())
-                        .addArguments(HEADLESS ? "--headless=new" : "")
-        );
-
+        // Allure listener
         SelenideLogger.addListener("AllureSelenide",
                 new AllureSelenide()
                         .screenshots(true)
                         .savePageSource(true));
-    }
-
-    private static void loadProperties() {
-        Properties props = new Properties();
-        try (InputStream input = BaseTest.class.getClassLoader().getResourceAsStream("app.properties")) {
-            if (input == null) {
-                throw new RuntimeException("app.properties не найден");
-            }
-            props.load(input);
-            BASE_URL = props.getProperty("base.url");
-            HEADLESS = Boolean.parseBoolean(props.getProperty("headless.mode", "true"));
-        } catch (IOException e) {
-            throw new RuntimeException("Ошибка при загрузке app.properties", e);
-        }
     }
 
     @AfterAll

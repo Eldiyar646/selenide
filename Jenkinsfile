@@ -5,7 +5,7 @@ pipeline {
         choice(
             name: 'TEST_SUITE',
             choices: ['Smoke', 'Regression'],
-            description: 'Выбери какой набор тестов запускать'
+            description: 'Выбери набор тестов для запуска'
         )
         booleanParam(
             name: 'CLEAN',
@@ -16,6 +16,8 @@ pipeline {
 
     environment {
         GRADLE_OPTS = '-Dorg.gradle.daemon=false'
+        HEADLESS = 'true'
+        BASE_URL = 'https://automationexercise.com'
     }
 
     stages {
@@ -27,10 +29,9 @@ pipeline {
 
         stage('Tests') {
             steps {
-                // Проверяем права и запускаем соответствующую задачу Gradle
                 sh 'chmod +x gradlew'
                 sh """
-                    ./gradlew ${params.CLEAN ? 'clean ' : ''}${params.TEST_SUITE}Test --no-daemon --info
+                    ./gradlew ${params.CLEAN ? 'clean ' : ''}${params.TEST_SUITE}Test --no-daemon --info --continue
                 """
             }
         }
@@ -38,8 +39,8 @@ pipeline {
 
     post {
         always {
-            // JUnit отчёты для соответствующей задачи
-            junit allowEmptyResults: true, testResults: "build/test-results/${params.TEST_SUITE}/*.xml"
+            // JUnit отчёты
+            junit allowEmptyResults: true, testResults: "build/test-results/${params.TEST_SUITE}/**/*.xml"
 
             // Allure отчёты
             allure includeProperties: false, jdk: '', results: [[path: 'build/allure-results']]
