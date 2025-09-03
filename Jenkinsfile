@@ -27,11 +27,10 @@ pipeline {
 
         stage('Tests') {
             steps {
-                // оборачиваем шаг в ansiColor
                 ansiColor('xterm') {
                     sh """
-                      chmod +x gradlew
-                      ./gradlew ${params.CLEAN ? 'clean ' : ''}${params.TEST_SUITE}Test --no-daemon
+                        chmod +x gradlew
+                        ./gradlew ${params.CLEAN ? 'clean ' : ''}${params.TEST_SUITE}Test --no-daemon
                     """
                 }
             }
@@ -40,9 +39,12 @@ pipeline {
 
     post {
         always {
-            junit allowEmptyResults: true, testResults: 'build/test-results/test/*.xml'
+            // Берем отчёты из папки соответствующей задачи
+            junit allowEmptyResults: true, testResults: "build/test-results/${params.TEST_SUITE}/*.xml"
+            // Allure
             allure includeProperties: false, jdk: '', results: [[path: 'build/allure-results']]
-            archiveArtifacts artifacts: 'build/reports/tests/**', allowEmptyArchive: true
+            // HTML
+            archiveArtifacts artifacts: "build/reports/tests/${params.TEST_SUITE}/**", allowEmptyArchive: true
         }
     }
 }

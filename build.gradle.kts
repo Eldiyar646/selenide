@@ -67,19 +67,35 @@ dependencies {
 tasks.test {
     useJUnitPlatform()
 }
-// Отдельная задача для запуска только тестов с @Tag("Smoke")
+
 tasks.register<Test>("SmokeTest") {
     group = "verification"
-    description = "Runs tests tagged with @Tag(\"Smoke\")"
+    description = "Runs tests tagged with @Tag(Tags.SMOKE)"
     useJUnitPlatform {
-        includeTags("Smoke")
+        includeTags("SMOKE")
     }
+    reports {
+        junitXml.required.set(true)
+        junitXml.outputLocation.set(layout.buildDirectory.dir("test-results/SmokeTest"))
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/tests/SmokeTest"))
+    }
+    systemProperty("allure.results.directory", "$buildDir/allure-results")
 }
-// Отдельная задача для запуска только тестов с @Tag("Regression")
+
 tasks.register<Test>("RegressionTest") {
     group = "verification"
-    description = "Runs tests tagged with @Tag(\"Regression\")"
+    description = "Runs tests tagged with @Tag(Tags.REGRESSION)"
     useJUnitPlatform {
-        includeTags("Regression")
+        includeTags("REGRESSION")
     }
+    reports {
+        junitXml.required.set(true)
+        junitXml.outputLocation.set(layout.buildDirectory.dir("test-results/RegressionTest"))
+        html.required.set(true)
+        html.outputLocation.set(layout.buildDirectory.dir("reports/tests/RegressionTest"))
+    }
+    systemProperty("allure.results.directory", "$buildDir/allure-results")
 }
+
+
