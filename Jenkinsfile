@@ -40,6 +40,12 @@ pipeline {
                 """
             }
         }
+
+        stage('Debug Allure Results') {
+            steps {
+                sh 'ls -la build/allure-results || true'
+            }
+        }
     }
 
     post {

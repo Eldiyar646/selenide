@@ -67,7 +67,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
 }
 
-tasks.test {
+tasks.withType<Test>().configureEach {
     useJUnitPlatform()
     systemProperty("allure.results.directory", "$buildDir/allure-results")
 }
@@ -77,7 +77,7 @@ tasks.register<Test>("SmokeTest") {
     group = "verification"
     description = "Runs tests tagged with @Tag(Tags.SMOKE)"
     useJUnitPlatform {
-        includeTags("Smoke") // Совпадает с Tags.SMOKE
+        includeTags("Smoke")
     }
     reports {
         junitXml.required.set(true)
@@ -85,7 +85,6 @@ tasks.register<Test>("SmokeTest") {
         html.required.set(true)
         html.outputLocation.set(layout.buildDirectory.dir("reports/tests/SmokeTest"))
     }
-    systemProperty("allure.results.directory", "$buildDir/allure-results")
 }
 
 // Задача для Regression тестов
@@ -93,7 +92,7 @@ tasks.register<Test>("RegressionTest") {
     group = "verification"
     description = "Runs tests tagged with @Tag(Tags.REGRESSION)"
     useJUnitPlatform {
-        includeTags("Regression") // Совпадает с Tags.REGRESSION
+        includeTags("Regression")
     }
     reports {
         junitXml.required.set(true)
@@ -101,5 +100,4 @@ tasks.register<Test>("RegressionTest") {
         html.required.set(true)
         html.outputLocation.set(layout.buildDirectory.dir("reports/tests/RegressionTest"))
     }
-    systemProperty("allure.results.directory", "$buildDir/allure-results")
 }
