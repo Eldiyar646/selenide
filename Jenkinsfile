@@ -9,8 +9,8 @@ pipeline {
     parameters {
         choice(
             name: 'TEST_SUITE',
-            choices: ['smoke', 'regression'],
-            description: 'Что запускать'
+            choices: ['Smoke', 'Regression'],
+            description: 'Выбери какой набор тестов запускать'
         )
         booleanParam(
             name: 'CLEAN',
@@ -20,7 +20,7 @@ pipeline {
     }
 
     environment {
-        // На CI лучше без демона, чтобы логи были полными
+        // чтобы логи были полными
         GRADLE_OPTS = '-Dorg.gradle.daemon=false'
     }
 
@@ -34,6 +34,7 @@ pipeline {
         stage('Tests') {
             steps {
                 sh """
+                  chmod +x gradlew
                   ./gradlew ${params.CLEAN ? 'clean ' : ''}${params.TEST_SUITE}Test --no-daemon
                 """
             }
@@ -42,11 +43,11 @@ pipeline {
 
     post {
         always {
-            // JUnit отчёты (полезно для "Trends")
+            // JUnit отчёты
             junit allowEmptyResults: true, testResults: 'build/test-results/test/*.xml'
-            // Allure (если плагин установлен)
+            // Allure (если установлен плагин)
             allure includeProperties: false, jdk: '', results: [[path: 'build/allure-results']]
-            // Сохранить HTML-репорты Gradle
+            // HTML-репорты Gradle
             archiveArtifacts artifacts: 'build/reports/tests/**', allowEmptyArchive: true
         }
     }
