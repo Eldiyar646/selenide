@@ -1,11 +1,6 @@
 pipeline {
     agent any
 
-    options {
-        timestamps()
-        ansiColor('xterm')
-    }
-
     parameters {
         choice(
             name: 'TEST_SUITE',
@@ -20,7 +15,6 @@ pipeline {
     }
 
     environment {
-        // чтобы логи были полными
         GRADLE_OPTS = '-Dorg.gradle.daemon=false'
     }
 
@@ -33,21 +27,21 @@ pipeline {
 
         stage('Tests') {
             steps {
-                sh """
-                  chmod +x gradlew
-                  ./gradlew ${params.CLEAN ? 'clean ' : ''}${params.TEST_SUITE}Test --no-daemon
-                """
+                // оборачиваем шаг в ansiColor
+                ansiColor('xterm') {
+                    sh """
+                      chmod +x gradlew
+                      ./gradlew ${params.CLEAN ? 'clean ' : ''}${params.TEST_SUITE}Test --no-daemon
+                    """
+                }
             }
         }
     }
 
     post {
         always {
-            // JUnit отчёты
             junit allowEmptyResults: true, testResults: 'build/test-results/test/*.xml'
-            // Allure (если установлен плагин)
             allure includeProperties: false, jdk: '', results: [[path: 'build/allure-results']]
-            // HTML-репорты Gradle
             archiveArtifacts artifacts: 'build/reports/tests/**', allowEmptyArchive: true
         }
     }
