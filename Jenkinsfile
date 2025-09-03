@@ -1,20 +1,26 @@
 pipeline {
     agent any
 
+    parameters {
+        choice(
+            name: 'TEST_SUITE',
+            choices: ['Smoke', 'Regression'],
+            description: 'Выбери какой набор тестов запускать'
+        )
+        booleanParam(
+            name: 'CLEAN',
+            defaultValue: true,
+            description: 'Выполнять gradle clean перед тестами'
+        )
+    }
+
     environment {
         JAVA_HOME = "/usr/lib/jvm/java-21-openjdk-amd64"
         PATH = "${JAVA_HOME}/bin:${env.PATH}"
-        ALLURE_RESULTS = "${WORKSPACE}/build/allure-results"
-        ALLURE_REPORT = "${WORKSPACE}/build/allure-report"
-    }
-
-    tools {
-        // Указываем имя Allure, как оно задано в Jenkins Global Tool Configuration
-        allure 'Allure'
     }
 
     stages {
-        stage('Checkout SCM') {
+        stage('Checkout') {
             steps {
                 checkout scm
             }
@@ -26,32 +32,30 @@ pipeline {
             }
         }
 
-        stage('Build & Test') {
+        stage('Run Tests') {
             steps {
-                sh './gradlew clean SmokeTest --no-daemon --info --continue'
-            }
-        }
-
-        stage('Generate Allure Report') {
-            steps {
-                allure([
-                    results: [[path: 'build/allure-results']],
-                    reportBuildPolicy: 'ALWAYS',
-                    includeProperties: false
-                ])
+                sh """
+                    ./gradlew ${params.CLEAN ? 'clean ' : ''}${params.TEST_SUITE}Test \
+                        --no-daemon --info --continue
+                """
             }
         }
     }
 
     post {
         always {
-            junit '**/build/test-results/SmokeTest/*.xml'
-        }
-        success {
-            echo "Tests passed!"
-        }
-        failure {
-            echo "Some tests failed. Check Allure report for details."
+            // JUnit отчёты
+            junit allowEmptyResults: true, testResults: "build/test-results/${params.TEST_SUITE}Test/*.xml"
+
+            // Allure отчёты
+            allure([
+                includeProperties: false,
+                jdk: '',
+                results: [[path: 'build/allure-results']]
+            ])
+
+            // HTML отчёт Gradle
+            archiveArtifacts artifacts: "build/reports/tests/${params.TEST_SUITE}Test/**", allowEmptyArchive: true
         }
     }
 }
