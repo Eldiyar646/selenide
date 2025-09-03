@@ -41,9 +41,12 @@ val ownerVersion = "1.0.9"
 val jacksonVersion = "2.17.0"
 val assertjVersion = "3.22.0"
 val lombokVersion = "1.18.30"
-val slf4jVersion = "2.0.16"
+val slf4jVersion = "2.0.17"
 val selenideVersion = "7.8.1"
+
 dependencies {
+    implementation("org.slf4j:slf4j-api:2.0.17")
+    implementation("org.seleniumhq.selenium:selenium-devtools-v134:4.32.0")
     implementation("org.json:json:20230227")
     implementation("org.aspectj:aspectjtools:1.9.22")
     implementation("org.aspectj:aspectjweaver:1.9.22")

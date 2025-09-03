@@ -2,16 +2,13 @@ package test.AutoExerciseTests;
 
 import base.BaseTest;
 import com.selenide.layers.web.page.home.HomePage;
-
-import io.qameta.allure.Owner;
-import io.qameta.allure.Severity;
+import io.qameta.allure.*;
 import io.qameta.allure.SeverityLevel;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import test.utils.TestRailCaseId;
 import test.utils.TestRailExtension;
-
 
 import static io.qameta.allure.Allure.step;
 
@@ -22,10 +19,15 @@ public class TestCase7 extends BaseTest {
     @TestRailCaseId("C1")
     @Order(7)
     @Owner("Eldiyar")
-    @DisplayName("Verify Test Cases Page")
+    @DisplayName("Test Case 7: Verify Test Cases Page")
     @Severity(SeverityLevel.BLOCKER)
-    void verifyTestCasesTest() {
-
+    @Description("""
+            1. Launch browser
+            2. Navigate to url 'http://automationexercise.com'
+            3. Verify that home page is visible successfully
+            4. Click on 'Test Cases' button
+            5. Verify user is navigated to test cases page successfully""")
+    void verifyTestCasesPage() {
         var softAssert = new SoftAssertions();
 
         var home = open(HomePage.class)
@@ -35,20 +37,18 @@ public class TestCase7 extends BaseTest {
             softAssert.assertThat(home.isPageTabActive("Home"))
                     .as("Home page is loaded and visible successfully")
                     .isTrue();
+
+            var testCase = home
+                    .clickTestCasesTab()
+                    .waitForPageLoaded();
+
+            step("Verify user is navigated to test cases page successfully", () -> {
+                softAssert.assertThat(testCase.isPageTabActive("Test Cases"))
+                        .as("User is navigated to test cases page successfully")
+                        .isTrue();
+            });
         });
-
-        var testCase = home
-                .clickTestCasesTab()
-                .waitForPageLoaded();
-
-        step("Verify user is navigated to test cases page successfully", () -> {
-            softAssert.assertThat(testCase.isPageTabActive("Test Cases"))
-                    .as("User is navigated to test cases page successfully")
-                    .isTrue();
-        });
-
         softAssert.assertAll();
-
     }
 }
 

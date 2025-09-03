@@ -1,6 +1,7 @@
 package com.selenide.layers.web.page.home;
 
 import com.codeborne.selenide.Condition;
+import com.codeborne.selenide.SelenideElement;
 import com.selenide.layers.web.page.BasePage;
 import com.selenide.layers.web.page.cart.CartPage;
 import com.selenide.layers.web.page.contactUs.ContactUsFormPage;
@@ -75,11 +76,20 @@ public class HomePage extends BasePage<HomePage> {
         return this;
     }
 
+    public String getName() {
+        SelenideElement name = $x("//input[@data-qa='name']");
+        return name.getValue();
+    }
+
     @Step("Check Logged in as banner visible{0}")
     public String getLoggedInBannerText() {
         return navBarElements.find(Condition.partialText("Logged in as"))
                 .getText();
     }
+
+
+
+
 
 
 //    public String isLoggedInAsVisible() {

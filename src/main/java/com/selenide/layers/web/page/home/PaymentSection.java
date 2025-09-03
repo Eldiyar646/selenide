@@ -8,17 +8,22 @@ import io.qameta.allure.Step;
 
 import java.time.Duration;
 
+import static com.codeborne.selenide.Condition.visible;
 import static com.codeborne.selenide.Selenide.$x;
 import static com.codeborne.selenide.Selenide.page;
 
 public class PaymentSection extends BasePage<PaymentSection> {
 
+    private final SelenideElement successAlert = $x("//div[@class='alert-success alert']");
+
+
     @Override
     public PaymentSection waitForPageLoaded() {
-        $x("//form[@id='payment-form']").shouldBe(Condition.visible);
+        $x("//form[@id='payment-form']").shouldBe(visible);
         return this;
     }
 
+    @Step("Input card information")
     public PaymentSection inputCardInformation() {
         elementManager.inputOnlyElement(ElementsOnPage.NAME_ON_CARD.getElementFromAccount().setValue("Eld"));
         elementManager.inputOnlyElement(ElementsOnPage.CARD_NUMBER.getElementFromAccount().setValue("1253659874"));
@@ -43,13 +48,18 @@ public class PaymentSection extends BasePage<PaymentSection> {
 //        } catch (UIAssertionError e) {
 //            return false;
 //        }
-    public String getSubscriptionAlertText() {
-            return $x("//div[@class='alert-success alert']")
-                    .should(Condition.appear, Duration.ofSeconds(2))
-                    .getText()
-                    .trim();
-        }
+
+    @Step("Wait for success alert after placing order")
+    public PaymentSection waitForSuccessAlert() {
+        successAlert.should(Condition.exist, Duration.ofSeconds(10));
+        return this;
     }
+
+    public String getSuccessAlertText() {
+        return successAlert.getText().trim();
+    }
+}
+
 
 
 
