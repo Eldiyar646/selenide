@@ -44,10 +44,10 @@ pipeline {
 
     post {
         always {
-            // JUnit отчёты
+            // JUnit XML отчёты
             junit allowEmptyResults: true, testResults: "build/test-results/${params.TEST_SUITE}Test/*.xml"
 
-            // Allure отчёты
+            // Allure отчёт
             allure([
                 includeProperties: false,
                 jdk: '',
