@@ -5,10 +5,7 @@ import static com.codeborne.selenide.Configuration.headless;
 
 public class WebDriverManager {
 
-    public static void configureBasicWebDriver(){
-
-        browser = "chrome";
-        headless = false;
-
+        public static void configureBasicWebDriver() {
+            browser = "chrome";
     }
 }
