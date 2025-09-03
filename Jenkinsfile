@@ -5,7 +5,7 @@ pipeline {
         choice(
             name: 'TEST_SUITE',
             choices: ['Smoke', 'Regression'],
-            description: 'Выбери какой набор тестов запускать'
+            description: 'Выбери набор тестов: SmokeTest или RegressionTest'
         )
         booleanParam(
             name: 'CLEAN',
@@ -34,16 +34,33 @@ pipeline {
 
         stage('Run Tests') {
             steps {
-                sh """
-                    ./gradlew ${params.CLEAN ? 'clean ' : ''}${params.TEST_SUITE}Test \
-                        --no-daemon --info --continue
-                """
+                script {
+                    // Вызываем конкретную задачу SmokeTest или RegressionTest
+                    def taskName = "${params.TEST_SUITE}Test"
+                    echo "Запускаем Gradle задачу: ${taskName}"
+
+                    // Выполняем Gradle и не падаем сразу
+                    def status = sh(
+                        script: "./gradlew ${params.CLEAN ? 'clean ' : ''}${taskName} --no-daemon --info --continue",
+                        returnStatus: true
+                    )
+
+                    // Если есть ошибки тестов, помечаем билд как UNSTABLE
+                    currentBuild.result = (status == 0) ? 'SUCCESS' : 'UNSTABLE'
+                }
             }
         }
 
         stage('Debug Allure Results') {
             steps {
-                sh 'ls -la build/allure-results || true'
+                sh '''
+                    if [ -d build/allure-results ]; then
+                        echo "Allure results found:"
+                        ls -la build/allure-results
+                    else
+                        echo "No Allure results found!"
+                    fi
+                '''
             }
         }
     }
@@ -54,11 +71,18 @@ pipeline {
             junit allowEmptyResults: true, testResults: "build/test-results/${params.TEST_SUITE}Test/*.xml"
 
             // Allure отчёт
-            allure([
-                includeProperties: false,
-                jdk: '',
-                results: [[path: 'build/allure-results']]
-            ])
+            script {
+                if (fileExists('build/allure-results')) {
+                    allure([
+                        includeProperties: true,
+                        reportBuildPolicy: 'ALWAYS',
+                        jdk: '',
+                        results: [[path: 'build/allure-results']]
+                    ])
+                } else {
+                    echo "Allure results folder not found, skipping Allure report."
+                }
+            }
 
             // HTML отчёт Gradle
             archiveArtifacts artifacts: "build/reports/tests/${params.TEST_SUITE}Test/**", allowEmptyArchive: true
