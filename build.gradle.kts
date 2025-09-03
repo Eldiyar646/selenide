@@ -46,7 +46,6 @@ val lombokVersion = "1.18.30"
 val slf4jVersion = "2.0.16"
 val selenideVersion = "7.8.1"
 dependencies {
-    testImplementation("org.json:json:20231013")
     implementation("org.aspectj:aspectjtools:1.9.22")
     implementation("org.aspectj:aspectjweaver:1.9.22")
     implementation("com.codeborne:selenide:$selenideVersion")
