@@ -23,7 +23,7 @@ java {
 }
 allure {
     report {
-        version.set("2.25.0")
+        version.set("2.34.1")
     }
     adapter {
         autoconfigure.set(true)
