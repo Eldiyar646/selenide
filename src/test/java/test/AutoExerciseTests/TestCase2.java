@@ -51,7 +51,7 @@ public class TestCase2 extends BaseTest {
                         .isEqualToIgnoringCase("Login to your account");
 
                 var afterLogin = login
-                        .inputLoginEmail("22@22.17")
+                        .inputLoginEmail("01@02.03")
                         .inputLoginPassword("1")
                         .clickLoginButton();
 
