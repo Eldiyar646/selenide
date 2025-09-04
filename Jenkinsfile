@@ -76,10 +76,6 @@ pipeline {
                         reportBuildPolicy: 'ALWAYS',
                         results: [[path: 'build/allure-results']]
                     ])
-                } else {
-                    echo "Allure results folder not found, skipping Allure report."
-                }
-            }
 
             // --- Вот эти три пункта я добавил, если что то пойдет не так нужно удалить
             //              (Отправка в Telegram, Архивируем отчет, Отправляем в Telegram)
