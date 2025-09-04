@@ -5,12 +5,12 @@ pipeline {
         choice(
             name: 'TEST_SUITE',
             choices: ['Smoke', 'Regression'],
-            description: 'Выбери набор тестов: SmokeTest или RegressionTest'
+            description: 'Choose test suite: Smoke or Regression'
         )
         booleanParam(
             name: 'CLEAN',
             defaultValue: true,
-            description: 'Выполнять gradle clean перед тестами'
+            description: 'Run gradle clean before tests'
         )
     }
 
@@ -25,11 +25,6 @@ pipeline {
                 checkout scm
             }
         }
-stage('Clean Build') {
-    steps {
-        sh 'rm -rf build'
-    }
-}
 
         stage('Prepare') {
             steps {
@@ -41,23 +36,15 @@ stage('Clean Build') {
             steps {
                 script {
                     def taskName = "${params.TEST_SUITE}Test"
-                    echo "Запускаем Gradle задачу: ${taskName}"
+                    echo "Running Gradle task: ${taskName}"
 
-                    // Выполняем Gradle и возвращаем статус
                     def status = sh(
                         script: "./gradlew ${params.CLEAN ? 'clean ' : ''}${taskName} --no-daemon --info --continue",
                         returnStatus: true
                     )
 
-                    // Если есть ошибки тестов, помечаем билд как UNSTABLE
                     currentBuild.result = (status == 0) ? 'SUCCESS' : 'UNSTABLE'
                 }
-            }
-        }
-
-        stage('Generate Allure Report') {
-            steps {
-                sh './gradlew allureReport --no-daemon --info'
             }
         }
 
@@ -77,16 +64,15 @@ stage('Clean Build') {
 
     post {
         always {
-            // JUnit XML отчёты
-            junit allowEmptyResults: true, testResults: "build/test-results/${params.TEST_SUITE}Test/*.xml"
+            // JUnit XML reports
+            junit allowEmptyResults: true, testResults: "build/test-results/test/*.xml"
 
-            // Allure отчёт
+            // Allure report
             script {
                 if (fileExists('build/allure-results')) {
                     allure([
                         includeProperties: true,
                         reportBuildPolicy: 'ALWAYS',
-                        jdk: '',
                         results: [[path: 'build/allure-results']]
                     ])
                 } else {
@@ -94,7 +80,7 @@ stage('Clean Build') {
                 }
             }
 
-            // HTML отчёт Gradle
+            // HTML Gradle reports
             archiveArtifacts artifacts: "build/reports/tests/${params.TEST_SUITE}Test/**", allowEmptyArchive: true
         }
     }
