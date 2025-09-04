@@ -82,7 +82,9 @@ pipeline {
                     def chatId = "8484572689"
 
                     // Архивируем Allure отчёт
-                    sh "zip -r allure-report.zip build/allure-report"
+                    //sh "zip -r allure-report.zip build/allure-report"
+                    //заменил на этот более стабильный
+                    sh "zip -r allure-report.zip build/allure-report || true"
 
                     // Отправляем архив в Telegram
                     sh """
