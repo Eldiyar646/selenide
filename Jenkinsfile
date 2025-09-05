@@ -111,7 +111,6 @@ stage('Run Tests') {
                 } else {
                     echo "Allure results folder not found, skipping Allure report."
                 }
-            }
 
             // HTML Gradle reports
             //archiveArtifacts artifacts: "build/reports/tests/${params.TEST_SUITE}Test/**", allowEmptyArchive: true
