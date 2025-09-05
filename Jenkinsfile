@@ -114,7 +114,11 @@ stage('Run Tests') {
             }
 
             // HTML Gradle reports
-            archiveArtifacts artifacts: "build/reports/tests/${params.TEST_SUITE}Test/**", allowEmptyArchive: true
+            //archiveArtifacts artifacts: "build/reports/tests/${params.TEST_SUITE}Test/**", allowEmptyArchive: true
+
+            // Добавил эти строки чтобы отчеты генерировались конкретно по выбранному тесту
+            def reportDir = (params.TEST_SUITE == 'Custom') ? 'build/reports/tests/test' : "build/reports/tests/${params.TEST_SUITE}Test"
+            archiveArtifacts artifacts: "${reportDir}/**", allowEmptyArchive: true
         }
     }
 }
