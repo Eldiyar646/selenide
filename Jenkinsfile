@@ -3,10 +3,17 @@ pipeline {
 
     parameters {
         choice(
-            name: 'TEST_SUITE',
-            choices: ['Smoke', 'Regression'],
-            description: 'Choose test suite: Smoke or Regression'
-        )
+        name: 'TEST_SUITE',
+        choices: ['Smoke', 'Regression', 'Custom'],
+        description: 'Choose test suite: Smoke, Regression or Custom test by name'
+    )
+
+            string(
+                name: 'TEST_NAME',
+                defaultValue: '',
+                description: 'Enter full test class name or method (e.g. com.example.LoginTest or com.example.LoginTest.myMethod)'
+            )
+
         booleanParam(
             name: 'CLEAN',
             defaultValue: true,
@@ -32,18 +39,26 @@ pipeline {
             }
         }
 
-        stage('Run Tests') {
-            steps {
-                script {
-                    def taskName = "${params.TEST_SUITE}Test"
-                    echo "Running Gradle task: ${taskName}"
+stage('Run Tests') {
+    steps {
+        script {
+            def gradleCommand = "./gradlew ${params.CLEAN ? 'clean ' : ''}"
 
-                    def status = sh(
-                        script: "./gradlew ${params.CLEAN ? 'clean ' : ''}${taskName} --no-daemon --info --continue",
-                        returnStatus: true
-                    )
+            if (params.TEST_SUITE == 'Custom' && params.TEST_NAME?.trim()) {
+                echo "Running specific test: ${params.TEST_NAME}"
+                gradleCommand += "test --tests \"${params.TEST_NAME}\""
+            } else {
+                def taskName = "${params.TEST_SUITE}Test"
+                echo "Running Gradle task: ${taskName}"
+                gradleCommand += "${taskName}"
+            }
 
-                    currentBuild.result = (status == 0) ? 'SUCCESS' : 'UNSTABLE'
+            def status = sh(
+                script: "${gradleCommand} --no-daemon --info --continue",
+                returnStatus: true
+            )
+
+            currentBuild.result = (status == 0) ? 'SUCCESS' : 'UNSTABLE'
                 }
             }
         }
