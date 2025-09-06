@@ -49,13 +49,13 @@ pipeline {
                         def tests = params.TEST_NAME.replaceAll('\\s','')
                         taskName = "test --tests \"${tests}\""
                         echo "Running specific test(s): ${tests}"
-                    } else if (params.TEST_SUITE == "Smoke") {
-                        taskName = "SmokeTest"
-                        echo "Running all Smoke tests"
-                    } else if (params.TEST_SUITE == "Regression") {
-                        taskName = "RegressionTest"
-                        echo "Running all Regression tests"
-                    } else {
+} else if (params.TEST_SUITE == "Smoke") {
+    taskName = "test -Djunit.jupiter.tags=Smoke"
+    echo "Running all Smoke tests"
+} else if (params.TEST_SUITE == "Regression") {
+    taskName = "test -Djunit.jupiter.tags=Regression"
+    echo "Running all Regression tests"
+} else {
                         error "No test selected or TEST_NAME is empty for Custom"
                     }
 
@@ -112,7 +112,7 @@ pipeline {
                 }
 
                 // Архивируем отчеты Gradle
-                def reportDir = (params.TEST_SUITE == 'Custom') ? 'build/reports/tests/test' : "build/reports/tests/${params.TEST_SUITE}Test"
+                def reportDir = 'build/reports/tests/test'
                 archiveArtifacts artifacts: "${reportDir}/**", allowEmptyArchive: true
             }
         }
