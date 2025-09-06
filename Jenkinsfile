@@ -90,6 +90,13 @@ pipeline {
 
             script {
                 if (fileExists('build/allure-results')) {
+                    // Получение результатов тестов
+                    def testResult = currentBuild.getTestResultAction()
+                    def totalTests = testResult.getTotalCount()
+                    def passedTests = testResult.getPassCount()
+                    def failedTests = testResult.getFailCount()
+                    def passedPercentage = (totalTests > 0) ? (passedTests * 100 / totalTests).round(2) : 0
+
                     // Генерация Allure отчёта
                     allure([
                         includeProperties: true,
@@ -97,20 +104,30 @@ pipeline {
                         results: [[path: 'build/allure-results']]
                     ])
 
-                    // Отправка в Telegram
-                    def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
-                    def chatId = "8484572689"
-                    sh "zip -r allure-report.zip allure-report || true"
-                    sh """
-                        curl -s -X POST "https://api.telegram.org/bot${botToken}/sendDocument" \
-                             -F chat_id=${chatId} \
-                             -F document=@allure-report.zip \
-                             -F caption="Allure Report for Jenkins build #${env.BUILD_NUMBER}"
-                    """
-                } else {
-                    echo "Allure results folder not found, skipping Allure report."
-                }
 
+        // Формирование и отправка текстового сообщения в Telegram
+        def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
+        def chatId = "8484572689"
+        def messageText = """
+        Results:
+        Environment: env
+        Comment: some comment
+        Duration: ${currentBuild.durationString}
+        Total scenarios: ${totalTests}
+        Total passed: ${passedTests} (${passedPercentage}%)
+        Total failed: ${failedTests} (${(100 - passedPercentage).round(2)}%)
+        Report available at the link: ${env.BUILD_URL}allure
+        """
+
+        // Отправка запроса в Telegram
+        sh """
+            curl -s -X POST "https://api.telegram.org/bot${botToken}/sendMessage" \
+                 -d "chat_id=${chatId}" \
+                 -d "text=${messageText}"
+        """
+    } else {
+        echo "Allure results folder not found, skipping Allure report and Telegram notification."
+    }
                 // Архивируем отчеты Gradle
                 def reportDir = 'build/reports/tests/test'
                 archiveArtifacts artifacts: "${reportDir}/**", allowEmptyArchive: true
