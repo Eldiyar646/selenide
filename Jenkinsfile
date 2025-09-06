@@ -95,25 +95,25 @@ pipeline {
                         ])
 
                         // *** Новый шаг: Установка Puppeteer и создание скриншота ***
-                        sh """
-                            npm init -y
-                            npm install puppeteer
+sh """
+    npm init -y
+    npm install puppeteer
 
-                            node -e "
-                              const puppeteer = require('puppeteer');
-                              (async () => {
-                                const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
-                                const page = await browser.newPage();
-                                await page.goto(\\'file:///${env.WORKSPACE}/allure-report/index.html\\');
-                                await page.setViewport({ width: 1000, height: 800 });
-                                const chart = await page.$('.widgets');
-                                if (chart) {
-                                  await chart.screenshot({ path: 'chart.png' });
-                                }
-                                await browser.close();
-                              })();
-                            "
-                        """
+    node -e "
+      const puppeteer = require('puppeteer');
+      (async () => {
+        const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+        const page = await browser.newPage();
+        await page.goto('file:///${env.WORKSPACE}/allure-report/index.html');
+        await page.setViewport({ width: 1000, height: 800 });
+        const chart = await page.$('.widgets');
+        if (chart) {
+          await chart.screenshot({ path: 'chart.png' });
+        }
+        await browser.close();
+      })();
+    "
+"""
                         echo "Allure report chart saved as chart.png"
                     } else {
                         echo "Allure results folder not found, skipping Allure report and chart generation."
