@@ -91,7 +91,7 @@ pipeline {
             script {
                 if (fileExists('build/allure-results')) {
                     // Получение результатов тестов
-                    def testResult = currentBuild.getTestResultAction()
+                    def testResult = currentBuild.getAction(hudson.tasks.junit.TestResultAction)
                     def totalTests = testResult.getTotalCount()
                     def passedTests = testResult.getPassCount()
                     def failedTests = testResult.getFailCount()
