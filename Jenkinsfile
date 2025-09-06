@@ -82,6 +82,45 @@ pipeline {
                 '''
             }
         }
+
+        stage('Generate Allure Report and Chart') {
+            steps {
+                script {
+                    if (fileExists('build/allure-results')) {
+                        // Генерация Allure отчёта
+                        allure([
+                            includeProperties: true,
+                            reportBuildPolicy: 'ALWAYS',
+                            results: [[path: 'build/allure-results']]
+                        ])
+
+                        // *** Новый шаг: Установка Puppeteer и создание скриншота ***
+                        sh """
+                            npm init -y
+                            npm install puppeteer
+
+                            node -e "
+                              const puppeteer = require('puppeteer');
+                              (async () => {
+                                const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+                                const page = await browser.newPage();
+                                await page.goto('file:///${env.WORKSPACE}/allure-report/index.html');
+                                await page.setViewport({ width: 1000, height: 800 });
+                                const chart = await page.$('.widgets');
+                                if (chart) {
+                                  await chart.screenshot({ path: 'chart.png' });
+                                }
+                                await browser.close();
+                              })();
+                            "
+                        """
+                        echo "Allure report chart saved as chart.png"
+                    } else {
+                        echo "Allure results folder not found, skipping Allure report and chart generation."
+                    }
+                }
+            }
+        }
     }
 
     post {
@@ -95,34 +134,25 @@ pipeline {
                         def passedTests = testResult.getPassCount()
                         def failedTests = testResult.getFailCount()
 
-def passedPercentage = (totalTests > 0) ? (passedTests * 100 / (double)totalTests) : 0
-def formattedPassedPercentage = String.format("%.2f", passedPercentage) + "%"
-
-def failedPercentage = (totalTests > 0) ? (failedTests * 100 / (double)totalTests) : 0
-def formattedFailedPercentage = String.format("%.2f", failedPercentage) + "%"
-
-                        allure([
-                            includeProperties: true,
-                            reportBuildPolicy: 'ALWAYS',
-                            results: [[path: 'build/allure-results']]
-                        ])
+                        def passedPercentage = (totalTests > 0) ? (int)((double) passedTests * 10000 / totalTests) / 100.0 : 0
+                        def failedPercentage = (totalTests > 0) ? (int)((double) failedTests * 10000 / totalTests) / 100.0 : 0
 
                         def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
                         def chatId = "8484572689"
 
-                        // Убрал лишние пробелы и добавил явные \n
-                        def messageText = "Results:\nEnvironment: env\nComment: some comment\nDuration: ${currentBuild.durationString}\nTotal scenarios: ${totalTests}\nTotal passed: ${passedTests} (${formattedPassedPercentage})\nTotal failed: ${failedTests} (${formattedFailedPercentage})\nReport available at the link: ${env.BUILD_URL}allure"
+                        def messageText = "Results:\nEnvironment: env\nComment: some comment\nDuration: ${currentBuild.durationString}\nTotal scenarios: ${totalTests}\nTotal passed: ${passedTests} (${passedPercentage}%)\nTotal failed: ${failedTests} (${failedPercentage}%)\nReport available at the link: ${env.BUILD_URL}allure"
 
-                        if (fileExists('PIPELINE.png')) {
+                        // Теперь проверяем, что наш динамический файл chart.png существует
+                        if (fileExists('chart.png')) {
                             sh """
                                 curl -s -X POST \\
                                      -F "chat_id=${chatId}" \\
-                                     -F "photo=@PIPELINE.png" \\
+                                     -F "photo=@chart.png" \\
                                      -F "caption=${messageText}" \\
                                      "https://api.telegram.org/bot${botToken}/sendPhoto"
                             """
                         } else {
-                            echo "File PIPELINE.png not found, skipping photo upload to Telegram."
+                            echo "Chart file chart.png not found, skipping photo upload to Telegram."
                             sh """
                                 curl -s -X POST \\
                                      --data-urlencode "chat_id=${chatId}" \\
