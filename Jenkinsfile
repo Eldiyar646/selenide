@@ -47,7 +47,6 @@ pipeline {
                     def taskName
 
                     if (params.TEST_SUITE == "Custom" && params.TEST_NAME?.trim()) {
-                        // Поддержка нескольких тестов через запятую
                         def tests = params.TEST_NAME.replaceAll('\\s', '')
                         taskName = "test --tests \"${tests}\""
                         echo "Running specific test(s): ${tests}"
@@ -96,40 +95,38 @@ pipeline {
                         def passedTests = testResult.getPassCount()
                         def failedTests = testResult.getFailCount()
 
-                        // Используем математический метод округления, чтобы обойти ограничения sandbox
                         def passedPercentage = (totalTests > 0) ? (int)((double) passedTests * 10000 / totalTests) / 100.0 : 0
                         def failedPercentage = (totalTests > 0) ? (int)((double) failedTests * 10000 / totalTests) / 100.0 : 0
 
-                        // Генерация Allure отчёта
                         allure([
                             includeProperties: true,
                             reportBuildPolicy: 'ALWAYS',
                             results: [[path: 'build/allure-results']]
                         ])
 
-                        // Формирование и отправка текстового сообщения в Telegram
                         def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
                         def chatId = "8484572689"
-                        def messageText = """
-                            Results:
-                            Environment: env
-                            Comment: some comment
-                            Duration: ${currentBuild.durationString}
-                            Total scenarios: ${totalTests}
-                            Total passed: ${passedTests} (${passedPercentage}%)
-                            Total failed: ${failedTests} (${failedPercentage}%)
-                            Report available at the link: ${env.BUILD_URL}allure
-                        """
 
-                        // Отправка изображения с текстовой подписью
-                        // Замените PIPLINA.png на имя вашего файла, если оно отличается
-                        sh """
-                            curl -s -X POST \\
-                                 -F "chat_id=${chatId}" \\
-                                 -F "photo=@PIPLINE.png" \\
-                                 -F "caption=${messageText}" \\
-                                 "https://api.telegram.org/bot${botToken}/sendPhoto"
-                        """
+                        // Убрал лишние пробелы и добавил явные \n
+                        def messageText = "Results:\nEnvironment: env\nComment: some comment\nDuration: ${currentBuild.durationString}\nTotal scenarios: ${totalTests}\nTotal passed: ${passedTests} (${passedPercentage}%)\nTotal failed: ${failedTests} (${failedPercentage}%)\nReport available at the link: ${env.BUILD_URL}allure"
+
+                        if (fileExists('PIPLINE.png')) {
+                            sh """
+                                curl -s -X POST \\
+                                     -F "chat_id=${chatId}" \\
+                                     -F "photo=@PIPLINE.png" \\
+                                     -F "caption=${messageText}" \\
+                                     "https://api.telegram.org/bot${botToken}/sendPhoto"
+                            """
+                        } else {
+                            echo "File PIPLINE.png not found, skipping photo upload to Telegram."
+                            sh """
+                                curl -s -X POST \\
+                                     --data-urlencode "chat_id=${chatId}" \\
+                                     --data-urlencode "text=${messageText}" \\
+                                     "https://api.telegram.org/bot${botToken}/sendMessage"
+                            """
+                        }
                     } else {
                         echo "JUnit test results not found, skipping Telegram notification."
                     }
@@ -137,7 +134,6 @@ pipeline {
                     echo "Allure results folder not found, skipping Allure report and Telegram notification."
                 }
 
-                // Архивируем отчеты Gradle
                 def reportDir = 'build/reports/tests/test'
                 archiveArtifacts artifacts: "${reportDir}/**", allowEmptyArchive: true
             }
