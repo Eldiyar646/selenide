@@ -88,7 +88,6 @@ pipeline {
     post {
         always {
             script {
-                // Вызываем junit внутри скриптового блока и присваиваем его результат переменной
                 def testResult = junit(allowEmptyResults: true, testResults: "build/test-results/test/*.xml")
 
                 if (fileExists('build/allure-results')) {
@@ -122,11 +121,14 @@ pipeline {
                             Report available at the link: ${env.BUILD_URL}allure
                         """
 
-                        // Отправка запроса в Telegram
+                        // Отправка изображения с текстовой подписью
+                        // Замените PIPLINA.png на имя вашего файла, если оно отличается
                         sh """
-                            curl -s -X POST "https://api.telegram.org/bot${botToken}/sendMessage" \\
-                                 --data-urlencode "chat_id=${chatId}" \\
-                                 --data-urlencode "text=${messageText}"
+                            curl -s -X POST \\
+                                 -F "chat_id=${chatId}" \\
+                                 -F "photo=@PIPLINE.png" \\
+                                 -F "caption=${messageText}" \\
+                                 "https://api.telegram.org/bot${botToken}/sendPhoto"
                         """
                     } else {
                         echo "JUnit test results not found, skipping Telegram notification."
