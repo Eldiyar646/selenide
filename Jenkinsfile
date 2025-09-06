@@ -87,48 +87,43 @@ pipeline {
 
     post {
         always {
-            // JUnit XML reports
-            junit allowEmptyResults: true, testResults: "build/test-results/test/*.xml"
-
             script {
+                // Теперь мы получаем результаты напрямую из шага junit
+                def testResult = junit(allowEmptyResults: true, testResults: "build/test-results/test/*.xml")
+
                 if (fileExists('build/allure-results')) {
-                    def testResult = currentBuild.getAction(TestResultAction)
-                    if (testResult != null) {
-                        def totalTests = testResult.getTotalCount()
-                        def passedTests = testResult.getPassCount()
-                        def failedTests = testResult.getFailCount()
-                        def passedPercentage = (totalTests > 0) ? ((double) passedTests * 100 / totalTests).round(2) : 0
+                    def totalTests = testResult.getTotalCount()
+                    def passedTests = testResult.getPassCount()
+                    def failedTests = testResult.getFailCount()
+                    def passedPercentage = (totalTests > 0) ? ((double) passedTests * 100 / totalTests).round(2) : 0
 
-                        // Генерация Allure отчёта
-                        allure([
-                            includeProperties: true,
-                            reportBuildPolicy: 'ALWAYS',
-                            results: [[path: 'build/allure-results']]
-                        ])
+                    // Генерация Allure отчёта
+                    allure([
+                        includeProperties: true,
+                        reportBuildPolicy: 'ALWAYS',
+                        results: [[path: 'build/allure-results']]
+                    ])
 
-                        // Формирование и отправка текстового сообщения в Telegram
-                        def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
-                        def chatId = "8484572689"
-                        def messageText = """
-                            Results:
-                            Environment: env
-                            Comment: some comment
-                            Duration: ${currentBuild.durationString}
-                            Total scenarios: ${totalTests}
-                            Total passed: ${passedTests} (${passedPercentage}%)
-                            Total failed: ${failedTests} (${(100 - passedPercentage).round(2)}%)
-                            Report available at the link: ${env.BUILD_URL}allure
-                        """
+                    // Формирование и отправка текстового сообщения в Telegram
+                    def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
+                    def chatId = "8484572689"
+                    def messageText = """
+                        Results:
+                        Environment: env
+                        Comment: some comment
+                        Duration: ${currentBuild.durationString}
+                        Total scenarios: ${totalTests}
+                        Total passed: ${passedTests} (${passedPercentage}%)
+                        Total failed: ${failedTests} (${(100 - passedPercentage).round(2)}%)
+                        Report available at the link: ${env.BUILD_URL}allure
+                    """
 
-                        // Отправка запроса в Telegram
-                        sh """
-                            curl -s -X POST "https://api.telegram.org/bot${botToken}/sendMessage" \\
-                                 --data-urlencode "chat_id=${chatId}" \\
-                                 --data-urlencode "text=${messageText}"
-                        """
-                    } else {
-                        echo "JUnit test results not found, skipping Telegram notification."
-                    }
+                    // Отправка запроса в Telegram
+                    sh """
+                        curl -s -X POST "https://api.telegram.org/bot${botToken}/sendMessage" \\
+                             --data-urlencode "chat_id=${chatId}" \\
+                             --data-urlencode "text=${messageText}"
+                    """
                 } else {
                     echo "Allure results folder not found, skipping Allure report and Telegram notification."
                 }
