@@ -111,7 +111,7 @@ def formattedFailedPercentage = String.format("%.2f", failedPercentage) + "%"
                         def chatId = "8484572689"
 
                         // Убрал лишние пробелы и добавил явные \n
-                        def messageText = "Results:\nEnvironment: env\nComment: some comment\nDuration: ${currentBuild.durationString}\nTotal scenarios: ${totalTests}\nTotal passed: ${passedTests} (${passedPercentage}%)\nTotal failed: ${failedTests} (${failedPercentage}%)\nReport available at the link: ${env.BUILD_URL}allure"
+                        def messageText = "Results:\nEnvironment: env\nComment: some comment\nDuration: ${currentBuild.durationString}\nTotal scenarios: ${totalTests}\nTotal passed: ${passedTests} (${formattedPassedPercentage})\nTotal failed: ${failedTests} (${formattedFailedPercentage})\nReport available at the link: ${env.BUILD_URL}allure"
 
                         if (fileExists('PIPELINE.png')) {
                             sh """
