@@ -1,4 +1,4 @@
-package test.AutoExerciseTests;
+    package test.AutoExerciseTests;
 
 import base.BaseTest;
 import com.selenide.layers.web.page.home.HomePage;
