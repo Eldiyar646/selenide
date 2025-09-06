@@ -85,57 +85,49 @@ pipeline {
     }
 
     post {
-        always {
-            script {
-                def testResult = junit(allowEmptyResults: true, testResults: "build/test-results/test/*.xml")
+            always {
+                script {
+                    def testResult = junit(allowEmptyResults: true, testResults: "build/test-results/test/*.xml")
 
-                if (fileExists('build/allure-results')) {
-                    if (testResult != null) {
-                        def totalTests = testResult.getTotalCount()
-                        def passedTests = testResult.getPassCount()
-                        def failedTests = testResult.getFailCount()
+                    if (fileExists('build/allure-results')) {
+                        if (testResult != null) {
+                            def totalTests = testResult.getTotalCount()
+                            def passedTests = testResult.getPassCount()
+                            def failedTests = testResult.getFailCount()
 
-def passedPercentage = (totalTests > 0) ? (passedTests * 100 / (double)totalTests) : 0
-def formattedPassedPercentage = String.format("%.2f", passedPercentage) + "%"
+                            def passedPercentage = (totalTests > 0) ? (passedTests * 100 / (double)totalTests) : 0
+                            def formattedPassedPercentage = String.format("%.2f", passedPercentage) + "%"
 
-def failedPercentage = (totalTests > 0) ? (failedTests * 100 / (double)totalTests) : 0
-def formattedFailedPercentage = String.format("%.2f", failedPercentage) + "%"
+                            def failedPercentage = (totalTests > 0) ? (failedTests * 100 / (double)totalTests) : 0
+                            def formattedFailedPercentage = String.format("%.2f", failedPercentage) + "%"
 
-                        allure([
-                            includeProperties: true,
-                            reportBuildPolicy: 'ALWAYS',
-                            results: [[path: 'build/allure-results']]
-                        ])
+                            allure([
+                                includeProperties: true,
+                                reportBuildPolicy: 'ALWAYS',
+                                results: [[path: 'build/allure-results']]
+                            ])
 
-                        def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
-                        def chatId = "8484572689"
+                            def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
+                            def chatId = "8484572689"
 
-                        // Убрал лишние пробелы и добавил явные \n
-                        def messageText = "Results:\nEnvironment: env\nComment: some comment\nDuration: ${currentBuild.durationString}\nTotal scenarios: ${totalTests}\nTotal passed: ${passedTests} (${formattedPassedPercentage})\nTotal failed: ${failedTests} (${formattedFailedPercentage})\nReport available at the link: ${env.BUILD_URL}allure"
+                            def messageText = "Results:\nEnvironment: env\nComment: some comment\nDuration: ${currentBuild.durationString}\nTotal scenarios: ${totalTests}\nTotal passed: ${passedTests} (${formattedPassedPercentage})\nTotal failed: ${failedTests} (${formattedFailedPercentage})\nReport available at the link: ${env.BUILD_URL}allure"
 
-                        sh """
-                                curl -s -X POST \\
-                                     -F "chat_id=${chatId}" \\
-                                     -F "caption=${messageText}" \\
-                                     "https://api.telegram.org/bot${botToken}/sendPhoto"
+                            // Удалена команда curl для отправки фото, так как она не нужна
+                            // Исправлена команда для отправки текстового сообщения
+                            sh """
+                                curl -s -X POST --data-urlencode "chat_id=${chatId}" --data-urlencode "text=${messageText}" "https://api.telegram.org/bot${botToken}/sendMessage"
                             """
-                        sh """
-                                curl -s -X POST \\
-                                     --data-urlencode "chat_id=${chatId}" \\
-                                     --data-urlencode "text=${messageText}" \\
-                                     "https://api.telegram.org/bot${botToken}/sendMessage"
-                            """
+                            }
+                        } else {
+                            echo "JUnit test results not found, skipping Telegram notification."
                         }
                     } else {
-                        echo "JUnit test results not found, skipping Telegram notification."
+                        echo "Allure results folder not found, skipping Allure report and Telegram notification."
                     }
-                } else {
-                    echo "Allure results folder not found, skipping Allure report and Telegram notification."
-                }
 
-                def reportDir = 'build/reports/tests/test'
-                archiveArtifacts artifacts: "${reportDir}/**", allowEmptyArchive: true
+                    def reportDir = 'build/reports/tests/test'
+                    archiveArtifacts artifacts: "${reportDir}/**", allowEmptyArchive: true
+                }
             }
         }
-    }
 }
