@@ -96,10 +96,10 @@ pipeline {
                         def failedTests = testResult.getFailCount()
 
 def passedPercentage = (totalTests > 0) ? (passedTests * 100 / (double)totalTests) : 0
-def formattedPercentage = String.format("%.2f", passedPercentage) + "%"
+def formattedPassedPercentage = String.format("%.2f", passedPercentage) + "%"
 
-def failedPercentage = (totalTests > 0) ? (passedTests * 100 / (double)totalTests) : 0
-def formattedPercentage = String.format("%.2f", failedPercentage) + "%"
+def failedPercentage = (totalTests > 0) ? (failedTests * 100 / (double)totalTests) : 0
+def formattedFailedPercentage = String.format("%.2f", failedPercentage) + "%"
 
                         allure([
                             includeProperties: true,
