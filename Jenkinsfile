@@ -120,11 +120,11 @@ pipeline {
         """
 
         // Отправка запроса в Telegram
-        sh """
-            curl -s -X POST "https://api.telegram.org/bot${botToken}/sendMessage" \
-                 -d "chat_id=${chatId}" \
-                 -d "text=${messageText}"
-        """
+sh """
+    curl -s -X POST "https://api.telegram.org/bot${botToken}/sendMessage" \
+         --data-urlencode "chat_id=${chatId}" \
+         --data-urlencode "text=${messageText}"
+"""
     } else {
         echo "Allure results folder not found, skipping Allure report and Telegram notification."
     }
