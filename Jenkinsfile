@@ -89,9 +89,11 @@ pipeline {
             junit allowEmptyResults: true, testResults: "build/test-results/test/*.xml"
 
             script {
+                import hudson.tasks.junit.TestResultAction
                 if (fileExists('build/allure-results')) {
+
                     // Получение результатов тестов
-                    def testResult = currentBuild.getAction(hudson.tasks.junit.TestResultAction)
+                    def testResult = currentBuild.getAction(TestResultAction)
                     def totalTests = testResult.getTotalCount()
                     def passedTests = testResult.getPassCount()
                     def failedTests = testResult.getFailCount()
