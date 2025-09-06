@@ -1,3 +1,5 @@
+import hudson.tasks.junit.TestResultAction
+
 pipeline {
     agent any
 
@@ -46,16 +48,16 @@ pipeline {
 
                     if (params.TEST_SUITE == "Custom" && params.TEST_NAME?.trim()) {
                         // Поддержка нескольких тестов через запятую
-                        def tests = params.TEST_NAME.replaceAll('\\s','')
+                        def tests = params.TEST_NAME.replaceAll('\\s', '')
                         taskName = "test --tests \"${tests}\""
                         echo "Running specific test(s): ${tests}"
-} else if (params.TEST_SUITE == "Smoke") {
-    taskName = "test -Djunit.jupiter.tags=Smoke"
-    echo "Running all Smoke tests"
-} else if (params.TEST_SUITE == "Regression") {
-    taskName = "test -Djunit.jupiter.tags=Regression"
-    echo "Running all Regression tests"
-} else {
+                    } else if (params.TEST_SUITE == "Smoke") {
+                        taskName = "test -Djunit.jupiter.tags=Smoke"
+                        echo "Running all Smoke tests"
+                    } else if (params.TEST_SUITE == "Regression") {
+                        taskName = "test -Djunit.jupiter.tags=Regression"
+                        echo "Running all Regression tests"
+                    } else {
                         error "No test selected or TEST_NAME is empty for Custom"
                     }
 
@@ -89,51 +91,54 @@ pipeline {
             junit allowEmptyResults: true, testResults: "build/test-results/test/*.xml"
 
             script {
-                import hudson.tasks.junit.TestResultAction
+                // Оператор import должен находиться вне этого блока, на верхнем уровне
+                // Мы уже импортировали его в самом начале файла
+
                 if (fileExists('build/allure-results')) {
-
-                    // Получение результатов тестов
                     def testResult = currentBuild.getAction(TestResultAction)
-                    def totalTests = testResult.getTotalCount()
-                    def passedTests = testResult.getPassCount()
-                    def failedTests = testResult.getFailCount()
-                    def passedPercentage = (totalTests > 0) ? (passedTests * 100 / totalTests).round(2) : 0
+                    if (testResult != null) {
+                        def totalTests = testResult.getTotalCount()
+                        def passedTests = testResult.getPassCount()
+                        def failedTests = testResult.getFailCount()
+                        def passedPercentage = (totalTests > 0) ? ((double) passedTests * 100 / totalTests).round(2) : 0
 
-                    // Генерация Allure отчёта
-                    allure([
-                        includeProperties: true,
-                        reportBuildPolicy: 'ALWAYS',
-                        results: [[path: 'build/allure-results']]
-                    ])
+                        // Генерация Allure отчёта
+                        allure([
+                            includeProperties: true,
+                            reportBuildPolicy: 'ALWAYS',
+                            results: [[path: 'build/allure-results']]
+                        ])
 
+                        // Формирование и отправка текстового сообщения в Telegram
+                        def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
+                        def chatId = "8484572689"
+                        def messageText = """
+                            Results:
+                            Environment: env
+                            Comment: some comment
+                            Duration: ${currentBuild.durationString}
+                            Total scenarios: ${totalTests}
+                            Total passed: ${passedTests} (${passedPercentage}%)
+                            Total failed: ${failedTests} (${(100 - passedPercentage).round(2)}%)
+                            Report available at the link: ${env.BUILD_URL}allure
+                        """
 
-        // Формирование и отправка текстового сообщения в Telegram
-        def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
-        def chatId = "8484572689"
-        def messageText = """
-        Results:
-        Environment: env
-        Comment: some comment
-        Duration: ${currentBuild.durationString}
-        Total scenarios: ${totalTests}
-        Total passed: ${passedTests} (${passedPercentage}%)
-        Total failed: ${failedTests} (${(100 - passedPercentage).round(2)}%)
-        Report available at the link: ${env.BUILD_URL}allure
-        """
-
-        // Отправка запроса в Telegram
-sh """
-    curl -s -X POST "https://api.telegram.org/bot${botToken}/sendMessage" \
-         --data-urlencode "chat_id=${chatId}" \
-         --data-urlencode "text=${messageText}"
-"""
-    } else {
-        echo "Allure results folder not found, skipping Allure report and Telegram notification."
-    }
-                // Архивируем отчеты Gradle
-                def reportDir = 'build/reports/tests/test'
-                archiveArtifacts artifacts: "${reportDir}/**", allowEmptyArchive: true
+                        // Отправка запроса в Telegram
+                        sh """
+                            curl -s -X POST "https://api.telegram.org/bot${botToken}/sendMessage" \\
+                                 --data-urlencode "chat_id=${chatId}" \\
+                                 --data-urlencode "text=${messageText}"
+                        """
+                    } else {
+                        echo "JUnit test results not found, skipping Telegram notification."
+                    }
+                } else {
+                    echo "Allure results folder not found, skipping Allure report and Telegram notification."
+                }
             }
+            // Архивируем отчеты Gradle
+            def reportDir = 'build/reports/tests/test'
+            archiveArtifacts artifacts: "${reportDir}/**", allowEmptyArchive: true
         }
     }
 }
