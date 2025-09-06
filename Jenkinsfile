@@ -91,9 +91,6 @@ pipeline {
             junit allowEmptyResults: true, testResults: "build/test-results/test/*.xml"
 
             script {
-                // Оператор import должен находиться вне этого блока, на верхнем уровне
-                // Мы уже импортировали его в самом начале файла
-
                 if (fileExists('build/allure-results')) {
                     def testResult = currentBuild.getAction(TestResultAction)
                     if (testResult != null) {
@@ -135,10 +132,11 @@ pipeline {
                 } else {
                     echo "Allure results folder not found, skipping Allure report and Telegram notification."
                 }
+
+                // Архивируем отчеты Gradle
+                def reportDir = 'build/reports/tests/test'
+                archiveArtifacts artifacts: "${reportDir}/**", allowEmptyArchive: true
             }
-            // Архивируем отчеты Gradle
-            def reportDir = 'build/reports/tests/test'
-            archiveArtifacts artifacts: "${reportDir}/**", allowEmptyArchive: true
         }
     }
 }
