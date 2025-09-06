@@ -97,8 +97,11 @@ pipeline {
                         def passedTests = testResult.getPassCount()
                         def failedTests = testResult.getFailCount()
 
-def passedPercentage = (totalTests > 0) ? new BigDecimal(passedTests * 100 / totalTests).setScale(2, RoundingMode.HALF_UP) : 0
-def failedPercentage = (totalTests > 0) ? new BigDecimal(failedTests * 100 / totalTests).setScale(2, RoundingMode.HALF_UP) : 0
+def passedPercentage = (totalTests > 0) ? (passedTests * 100 / (double)totalTests) : 0
+def formattedPercentage = String.format("%.2f", passedPercentage) + "%"
+
+def failedPercentage = (totalTests > 0) ? (passedTests * 100 / (double)totalTests) : 0
+def formattedPercentage = String.format("%.2f", failedPercentage) + "%"
 
                         allure([
                             includeProperties: true,
