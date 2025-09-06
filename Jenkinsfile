@@ -87,16 +87,19 @@ pipeline {
 
     post {
         always {
-            // Присваиваем результат шага junit переменной
-            def testResult = junit(allowEmptyResults: true, testResults: "build/test-results/test/*.xml")
-
             script {
+                // Вызываем junit внутри скриптового блока и присваиваем его результат переменной
+                def testResult = junit(allowEmptyResults: true, testResults: "build/test-results/test/*.xml")
+
                 if (fileExists('build/allure-results')) {
                     if (testResult != null) {
                         def totalTests = testResult.getTotalCount()
                         def passedTests = testResult.getPassCount()
                         def failedTests = testResult.getFailCount()
+
+                        // Используем математический метод округления, чтобы обойти ограничения sandbox
                         def passedPercentage = (totalTests > 0) ? (int)((double) passedTests * 10000 / totalTests) / 100.0 : 0
+                        def failedPercentage = (totalTests > 0) ? (int)((double) failedTests * 10000 / totalTests) / 100.0 : 0
 
                         // Генерация Allure отчёта
                         allure([
@@ -115,7 +118,7 @@ pipeline {
                             Duration: ${currentBuild.durationString}
                             Total scenarios: ${totalTests}
                             Total passed: ${passedTests} (${passedPercentage}%)
-                            Total failed: ${failedTests} (${(100 - passedPercentage).round(2)}%)
+                            Total failed: ${failedTests} (${failedPercentage}%)
                             Report available at the link: ${env.BUILD_URL}allure
                         """
 
