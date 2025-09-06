@@ -1,4 +1,6 @@
 import hudson.tasks.junit.TestResultAction
+import java.math.BigDecimal
+import java.math.RoundingMode
 
 pipeline {
     agent any
@@ -95,8 +97,8 @@ pipeline {
                         def passedTests = testResult.getPassCount()
                         def failedTests = testResult.getFailCount()
 
-                        def passedPercentage = (totalTests > 0) ? (int)((double) passedTests * 10000 / totalTests) / 100.0 : 0
-                        def failedPercentage = (totalTests > 0) ? (int)((double) failedTests * 10000 / totalTests) / 100.0 : 0
+def passedPercentage = (totalTests > 0) ? new BigDecimal(passedTests * 100 / totalTests).setScale(2, RoundingMode.HALF_UP) : 0
+def failedPercentage = (totalTests > 0) ? new BigDecimal(failedTests * 100 / totalTests).setScale(2, RoundingMode.HALF_UP) : 0
 
                         allure([
                             includeProperties: true,
