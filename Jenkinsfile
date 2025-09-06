@@ -87,20 +87,15 @@ pipeline {
 
     post {
         always {
-            // Вызываем junit как обычный шаг, а не внутри script
-            junit allowEmptyResults: true, testResults: "build/test-results/test/*.xml"
+            // Присваиваем результат шага junit переменной
+            def testResult = junit(allowEmptyResults: true, testResults: "build/test-results/test/*.xml")
 
             script {
-                // Получаем результаты тестов через getAction, что обычно разрешено
-                def testResult = currentBuild.getAction(TestResultAction)
-
                 if (fileExists('build/allure-results')) {
                     if (testResult != null) {
                         def totalTests = testResult.getTotalCount()
                         def passedTests = testResult.getPassCount()
                         def failedTests = testResult.getFailCount()
-
-                        // Используем математический метод округления, чтобы обойти ограничения
                         def passedPercentage = (totalTests > 0) ? (int)((double) passedTests * 10000 / totalTests) / 100.0 : 0
 
                         // Генерация Allure отчёта
