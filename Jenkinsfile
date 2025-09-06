@@ -1,6 +1,4 @@
 import hudson.tasks.junit.TestResultAction
-import java.math.BigDecimal
-import java.math.RoundingMode
 
 pipeline {
     agent any
