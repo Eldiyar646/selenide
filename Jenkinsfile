@@ -110,16 +110,16 @@ pipeline {
                         // Убрал лишние пробелы и добавил явные \n
                         def messageText = "Results:\nEnvironment: env\nComment: some comment\nDuration: ${currentBuild.durationString}\nTotal scenarios: ${totalTests}\nTotal passed: ${passedTests} (${passedPercentage}%)\nTotal failed: ${failedTests} (${failedPercentage}%)\nReport available at the link: ${env.BUILD_URL}allure"
 
-                        if (fileExists('PIPLINE.png')) {
+                        if (fileExists('PIPELINE.png')) {
                             sh """
                                 curl -s -X POST \\
                                      -F "chat_id=${chatId}" \\
-                                     -F "photo=@PIPLINE.png" \\
+                                     -F "photo=@PIPELINE.png" \\
                                      -F "caption=${messageText}" \\
                                      "https://api.telegram.org/bot${botToken}/sendPhoto"
                             """
                         } else {
-                            echo "File PIPLINE.png not found, skipping photo upload to Telegram."
+                            echo "File PIPELINE.png not found, skipping photo upload to Telegram."
                             sh """
                                 curl -s -X POST \\
                                      --data-urlencode "chat_id=${chatId}" \\
