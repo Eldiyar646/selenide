@@ -104,7 +104,7 @@ pipeline {
                               (async () => {
                                 const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
                                 const page = await browser.newPage();
-                                await page.goto(\\"file:///${env.WORKSPACE}/allure-report/index.html\\");
+                                await page.goto(\\'file:///${env.WORKSPACE}/allure-report/index.html\\');
                                 await page.setViewport({ width: 1000, height: 800 });
                                 const chart = await page.$('.widgets');
                                 if (chart) {
