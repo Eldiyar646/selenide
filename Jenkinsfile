@@ -66,13 +66,6 @@ pipeline {
                 }
             }
         }
-
-        stage('Build Chart Generator') {
-            steps {
-                sh "./gradlew shadowJar"
-            }
-        }
-
     }
 
     post {
@@ -98,6 +91,9 @@ pipeline {
                     def broken = summary.statistic.broken
                     def skipped = summary.statistic.skipped
 
+                    def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
+                    def chatId = "8484572689"
+
                     // Формируем текст сообщения
                     def messageText = """📊 *Результаты тестов*
 🕒 Duration: ${currentBuild.durationString.replace('and counting', '')}
@@ -109,27 +105,14 @@ pipeline {
 🔗 [Allure Report](${env.BUILD_URL}allure)
 """
 
-                    // Используем Jenkins Credentials для безопасного доступа к токену
-                    withCredentials([string(credentialsId: 'TELEGRAM_BOT_TOKEN', variable: 'BOT_TOKEN'), string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')]) {
-
-                        // Запускаем наш Java-код из созданного JAR-файла
-                        sh "java -jar build/libs/chart-generator.jar ${total} ${passed} ${failed} ${broken} ${skipped} chart.png"
-
-                        // Проверяем, что файл изображения был создан
-                        if (fileExists('chart.png')) {
-                            // Отправляем фото с подписью в Telegram
-                            sh """
-                                curl -s -X POST \
-                                     -F "chat_id=${CHAT_ID}" \
-                                     -F "photo=@chart.png" \
-                                     -F "caption=${messageText}" \
-                                     -F "parse_mode=Markdown" \
-                                     "https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto"
-                            """
-                        } else {
-                            echo "Chart.png not found, skipping Telegram photo notification."
-                        }
-                    }
+                    // Отправляем сообщение в Telegram (без картинки)
+                    sh """
+                        curl -s -X POST \
+                             -d chat_id=${chatId} \
+                             -d "text=${messageText}" \
+                             -d "parse_mode=Markdown" \
+                             "https://api.telegram.org/bot${botToken}/sendMessage"
+                    """
                 } else {
                     echo "Summary.json not found, skipping Telegram notification."
                 }
