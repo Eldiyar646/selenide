@@ -67,12 +67,10 @@ pipeline {
             }
         }
 
-        // Перемещаем генерацию JAR и отчета сюда
-        stage('Generate Report') {
+        stage('Generate and Send Report') {
             steps {
                 script {
-                    sh "./gradlew shadowJar"
-
+                    // Проверяем, существует ли файл Allure-отчета перед началом
                     if (fileExists('allure-report/widgets/summary.json')) {
                         def summary = readJSON file: 'allure-report/widgets/summary.json'
                         def total = summary.statistic.total
@@ -81,9 +79,39 @@ pipeline {
                         def broken = summary.statistic.broken
                         def skipped = summary.statistic.skipped
 
+                        // Шаг 1: Собираем исполняемый JAR-файл
+                        sh "./gradlew shadowJar"
+
+                        // Шаг 2: Запускаем собранный JAR-файл для создания графика
                         sh "java -jar build/libs/chart-generator.jar ${total} ${passed} ${failed} ${broken} ${skipped} chart.png"
+
+                        // Формируем текст сообщения
+                        def messageText = """📊 *Результаты тестов*
+🕒 Duration: ${currentBuild.durationString.replace('and counting', '')}
+📌 Total: ${total}
+✅ Passed: ${passed}
+❌ Failed: ${failed}
+💥 Broken: ${broken}
+⚠️ Skipped: ${skipped}
+🔗 [Allure Report](${env.BUILD_URL}allure)
+"""
+
+                        withCredentials([string(credentialsId: 'TELEGRAM_BOT_TOKEN', variable: 'BOT_TOKEN'), string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')]) {
+                            if (fileExists('chart.png')) {
+                                sh """
+                                    curl -s -X POST \
+                                         -F "chat_id=${CHAT_ID}" \
+                                         -F "photo=@chart.png" \
+                                         -F "caption=${messageText}" \
+                                         -F "parse_mode=Markdown" \
+                                         "https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto"
+                                """
+                            } else {
+                                echo "Chart.png not found, skipping Telegram photo notification."
+                            }
+                        }
                     } else {
-                        echo "Summary.json not found, skipping chart generation."
+                        echo "Summary.json not found, skipping report generation and notification."
                     }
                 }
             }
@@ -93,7 +121,7 @@ pipeline {
     post {
         always {
             script {
-                // Публикуем Allure-отчет.
+                // Публикуем Allure-отчет
                 allure([
                     includeProperties: true,
                     reportBuildPolicy: 'ALWAYS',
@@ -102,41 +130,6 @@ pipeline {
 
                 // Публикуем результаты JUnit
                 junit '**/build/test-results/test/TEST-*.xml'
-
-                if (fileExists('allure-report/widgets/summary.json')) {
-                    def summary = readJSON file: 'allure-report/widgets/summary.json'
-                    def total = summary.statistic.total
-                    def passed = summary.statistic.passed
-                    def failed = summary.statistic.failed
-                    def broken = summary.statistic.broken
-                    def skipped = summary.statistic.skipped
-
-                    def messageText = """📊 *Результаты тестов*
-🕒 Duration: ${currentBuild.durationString.replace('and counting', '')}
-📌 Total: ${total}
-✅ Passed: ${passed}
-❌ Failed: ${failed}
-💥 Broken: ${broken}
-⚠️ Skipped: ${skipped}
-🔗 [Allure Report](${env.BUILD_URL}allure)
-"""
-                    withCredentials([string(credentialsId: 'TELEGRAM_BOT_TOKEN', variable: 'BOT_TOKEN'), string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')]) {
-                        if (fileExists('chart.png')) {
-                            sh """
-                                curl -s -X POST \
-                                     -F "chat_id=${CHAT_ID}" \
-                                     -F "photo=@chart.png" \
-                                     -F "caption=${messageText}" \
-                                     -F "parse_mode=Markdown" \
-                                     "https://api.telegram.org/bot${BOT_TOKEN}/sendPhoto"
-                            """
-                        } else {
-                            echo "Chart.png not found, skipping Telegram photo notification."
-                        }
-                    }
-                } else {
-                    echo "Summary.json not found, skipping Telegram notification."
-                }
 
                 def reportDir = 'build/reports/tests/test'
                 archiveArtifacts artifacts: "${reportDir}/**", allowEmptyArchive: true
