@@ -38,10 +38,10 @@ public class ChartGenerator {
         int skipped = Integer.parseInt(args[4]);
         String outputPath = args[5];
 
-        generatePieChart(total, passed, failed, broken, skipped, outputPath);
+        generateChart(total, passed, failed, broken, skipped, outputPath);
     }
 
-    public static void generatePieChart(int total, int passed, int failed, int broken, int skipped, String outputPath) throws Exception {
+    public static void generateChart(int total, int passed, int failed, int broken, int skipped, String outputPath) throws Exception {
         DefaultPieDataset dataset = new DefaultPieDataset();
         dataset.setValue("✅ Passed " + passed, passed);
         dataset.setValue("❌ Failed " + failed, failed);

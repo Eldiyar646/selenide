@@ -4,7 +4,7 @@ version = "1.0-SNAPSHOT"
 plugins {
     id("java")
     id("io.freefair.lombok") version "8.4"
-    id("io.qameta.allure") version "2.9.4"
+    id("io.qameta.allure") version "2.11.2"
     id("org.gradle.test-retry") version "1.6.2"
 }
 
@@ -39,8 +39,6 @@ dependencies {
     implementation("com.codeborne:selenide:$selenideVersion")
     implementation("com.codeborne:selenide-selenoid:$selenideVersion")
     implementation("org.projectlombok:lombok:$lombokVersion")
-    implementation("io.github.bonigarcia:webdrivermanager:6.1.0")
-    implementation("org.seleniumhq.selenium:selenium-java:4.22.0")
     implementation("io.qameta.allure:allure-selenide:2.29.1")
     implementation("net.datafaker:datafaker:2.2.2")
     implementation("org.aeonbits.owner:owner:$ownerVersion")
