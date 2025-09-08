@@ -45,10 +45,12 @@ dependencies {
     implementation("net.datafaker:datafaker:2.2.2")
     implementation("org.aeonbits.owner:owner:$ownerVersion")
 
+
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
 
     // Тестовые зависимости
+    testImplementation("org.jfree:jfreechart:1.5.4")
     testImplementation("org.assertj:assertj-core:$assertjVersion")
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")

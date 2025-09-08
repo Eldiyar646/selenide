@@ -1,6 +1,5 @@
 import hudson.tasks.junit.TestResultAction
 
-
 pipeline {
     agent any
 
@@ -83,59 +82,66 @@ pipeline {
                 '''
             }
         }
+
+        stage('Allure Report') {
+            steps {
+                sh './gradlew allureReport'
+            }
+        }
     }
 
     post {
         always {
             script {
-                def testResult = junit(allowEmptyResults: true, testResults: "build/test-results/test/*.xml")
+                if (fileExists('build/reports/allure-report/widgets/summary.json')) {
+                    def summary = readJSON file: 'build/reports/allure-report/widgets/summary.json'
 
-                if (fileExists('build/allure-results')) {
-                    if (testResult != null) {
-                        def totalTests = testResult.getTotalCount()
-                        def passedTests = testResult.getPassCount()
-                        def failedTests = testResult.getFailCount()
+                    def total = summary.statistic.total
+                    def passed = summary.statistic.passed
+                    def failed = summary.statistic.failed
+                    def broken = summary.statistic.broken
+                    def skipped = summary.statistic.skipped
 
-def passedPercentage = (totalTests > 0) ? (passedTests * 100 / (double)totalTests) : 0
-def formattedPassedPercentage = String.format("%.2f", passedPercentage) + "%"
+                    allure([
+                        includeProperties: true,
+                        reportBuildPolicy: 'ALWAYS',
+                        results: [[path: 'build/allure-results']]
+                    ])
 
-def failedPercentage = (totalTests > 0) ? (failedTests * 100 / (double)totalTests) : 0
-def formattedFailedPercentage = String.format("%.2f", failedPercentage) + "%"
+                    def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
+                    def chatId = "8484572689"
 
-                        allure([
-                            includeProperties: true,
-                            reportBuildPolicy: 'ALWAYS',
-                            results: [[path: 'build/allure-results']]
-                        ])
+                    // формируем текст
+                    def messageText = """📊 *Результаты тестов*
+🕒 Duration: ${currentBuild.durationString.replace('and counting', '')}
+📌 Total: ${total}
+✅ Passed: ${passed}
+❌ Failed: ${failed}
+💥 Broken: ${broken}
+⚠️ Skipped: ${skipped}
+🔗 [Allure Report](${env.BUILD_URL}allure)
+"""
 
-                        def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
-                        def chatId = "8484572689"
+                    // билдим ChartGenerator
+                    sh "./gradlew classes"
 
-                        // Убрал лишние пробелы и добавил явные \n
-                        def messageText = "Results:\nEnvironment: env\nComment: some comment\nDuration: ${currentBuild.durationString}\nTotal scenarios: ${totalTests}\nTotal passed: ${passedTests} (${formattedPassedPercentage})\nTotal failed: ${failedTests} (${formattedFailedPercentage})\nReport available at the link: ${env.BUILD_URL}allure"
+                    // генерируем chart.png
+                    sh """
+                        java -cp build/classes/java/test:~/.gradle/caches/modules-2/files-2.1/* utils.ChartGenerator \
+                        ${total} ${passed} ${failed} ${broken} ${skipped} chart.png
+                    """
 
-                        if (fileExists('PIPELINE.png')) {
-                            sh """
-                                curl -s -X POST \\
-                                     -F "chat_id=${chatId}" \\
-                                     -F "photo=@PIPELINE.png" \\
-                                     -F "caption=${messageText}" \\
-                                     "https://api.telegram.org/bot${botToken}/sendPhoto"
-                            """
-                        } else {
-                            echo "File PIPELINE.png not found, skipping photo upload to Telegram."
-                            sh """
-                                curl -s -X POST \\
-                                     --data-urlencode "chat_id=${chatId}" \\
-                                     --data-urlencode "text=${messageText}" \\
-                                     "https://api.telegram.org/bot${botToken}/sendMessage"
-                            """
-                        }
-                    } else {
-                        echo "JUnit test results not found, skipping Telegram notification."
-                    }
+                    // отправляем текст + картинку в Telegram
+                    sh """
+                        curl -s -X POST \
+                             -F "chat_id=${chatId}" \
+                             -F "photo=@chart.png" \
+                             -F "caption=${messageText}" \
+                             -F "parse_mode=Markdown" \
+                             "https://api.telegram.org/bot${botToken}/sendPhoto"
+                    """
                 } else {
-                    echo "Allure results folder not found, skipping Allure report and Telegram notification."
+                    echo "summary.json not found, skipping Telegram notification."
                 }
 
                 def reportDir = 'build/reports/tests/test'
@@ -144,4 +150,3 @@ def formattedFailedPercentage = String.format("%.2f", failedPercentage) + "%"
         }
     }
 }
-
