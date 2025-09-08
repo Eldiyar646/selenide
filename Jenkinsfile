@@ -106,12 +106,19 @@ pipeline {
 🔗 [Allure Report](${env.BUILD_URL}allure)
 """
 
-                    // Отправляем сообщение в Telegram (без картинки)
+                    // Генерируем изображение chart.png
+                    sh """
+                             java -cp build/classes/java/test:~/.gradle/caches/modules-2/files-2.1/* utils.ChartGenerator \\
+                                        ${total} ${passed} ${failed} ${broken} ${skipped} chart.png
+                                    """
+
+                    // Отправляем фото с подписью в Telegram ()
                     sh """
                         curl -s -X POST \
-                             -d chat_id=${chatId} \
-                             -d "text=${messageText}" \
-                             -d "parse_mode=Markdown" \
+                             -F "chat_id=${chatId}"" \
+                             -F "photo=@chart.png" \
+                             -F "caption=${messageText}" \
+                             -F "parse_mode=Markdown" \
                              "https://api.telegram.org/bot${botToken}/sendMessage"
                     """
                 } else {
