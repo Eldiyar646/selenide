@@ -39,6 +39,13 @@ pipeline {
             }
         }
 
+        // Новый этап для сборки нашего JAR-файла
+        stage('Build Chart Generator') {
+            steps {
+                sh "./gradlew shadowJar"
+            }
+        }
+
         stage('Run Tests') {
             steps {
                 script {
@@ -104,11 +111,9 @@ pipeline {
 
                     // Используем Jenkins Credentials для безопасного доступа к токену
                     withCredentials([string(credentialsId: 'TELEGRAM_BOT_TOKEN', variable: 'BOT_TOKEN'), string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')]) {
-                        // Генерируем изображение chart.png
-                        sh """
-                             java -cp build/classes/java/test:~/.gradle/caches/modules-2/files-2.1/* utils.ChartGenerator \\
-                                 ${total} ${passed} ${failed} ${broken} ${skipped} chart.png
-                        """
+
+                        // Запускаем наш Java-код из созданного JAR-файла
+                        sh "java -jar build/libs/chart-generator.jar ${total} ${passed} ${failed} ${broken} ${skipped} chart.png"
 
                         // Проверяем, что файл изображения был создан
                         if (fileExists('chart.png')) {
