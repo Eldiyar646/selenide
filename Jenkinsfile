@@ -83,8 +83,8 @@ pipeline {
                 junit '**/build/test-results/test/TEST-*.xml'
 
                 // Теперь файл summary.json должен существовать
-                if (fileExists('build/reports/allure-report/widgets/summary.json')) {
-                    def summary = readJSON file: 'build/reports/allure-report/widgets/summary.json'
+                if (fileExists('allure-report/widgets/summary.json')) {
+                    def summary = readJSON file: 'allure-report/widgets/summary.json'
 
                     def total = summary.statistic.total
                     def passed = summary.statistic.passed
