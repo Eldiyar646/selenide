@@ -4,8 +4,7 @@ version = "1.0-SNAPSHOT"
 plugins {
     id("java")
     id("io.freefair.lombok") version "8.4"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
-    id("io.qameta.allure") version "2.11.2"
+    id("io.qameta.allure") version "2.9.4"
     id("org.gradle.test-retry") version "1.6.2"
 }
 
@@ -40,10 +39,12 @@ dependencies {
     implementation("com.codeborne:selenide:$selenideVersion")
     implementation("com.codeborne:selenide-selenoid:$selenideVersion")
     implementation("org.projectlombok:lombok:$lombokVersion")
+    implementation("io.github.bonigarcia:webdrivermanager:6.1.0")
+    implementation("org.seleniumhq.selenium:selenium-java:4.22.0")
     implementation("io.qameta.allure:allure-selenide:2.29.1")
     implementation("net.datafaker:datafaker:2.2.2")
     implementation("org.aeonbits.owner:owner:$ownerVersion")
-    implementation("org.jfree:jfreechart:1.5.4")
+
 
     compileOnly("org.projectlombok:lombok:$lombokVersion")
     annotationProcessor("org.projectlombok:lombok:$lombokVersion")
@@ -54,15 +55,6 @@ dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("io.qameta.allure:allure-junit5:2.29.1")
-}
-
-// Конфигурация для сборки исполняемого JAR-файла
-// Эта задача упакует ваш код и все зависимости (включая JFreeChart) в один файл
-tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
-    archiveBaseName.set("chart-generator")
-    manifest {
-        attributes["Main-Class"] = "utils.ChartGenerator"
-    }
 }
 
 tasks.test {
