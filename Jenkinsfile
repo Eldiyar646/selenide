@@ -93,8 +93,8 @@ pipeline {
     post {
         always {
             script {
-                if (fileExists('build/reports/allure-report/widgets/summary.json')) {
-                    def summary = readJSON file: 'build/reports/allure-report/widgets/summary.json'
+                if (fileExists('build/reports/allure-report/allureReport/widgets/summary.json')) {
+                    def summary = readJSON file: 'build/reports/allure-report/allureReport/widgets/summary.json'
 
                     def total = summary.statistic.total
                     def passed = summary.statistic.passed
