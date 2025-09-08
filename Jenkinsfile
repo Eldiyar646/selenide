@@ -39,7 +39,7 @@ pipeline {
             }
         }
 
-        // Новый этап для сборки нашего JAR-файла
+        // Добавляем новый этап для сборки нашего JAR-файла
         stage('Build Chart Generator') {
             steps {
                 sh "./gradlew shadowJar"
