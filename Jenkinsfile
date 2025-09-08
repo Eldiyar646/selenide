@@ -1,4 +1,3 @@
-import hudson.tasks.junit.TestResultAction
 
 pipeline {
     agent any
@@ -45,7 +44,6 @@ pipeline {
             steps {
                 script {
                     def taskName
-
                     if (params.TEST_SUITE == "Custom" && params.TEST_NAME?.trim()) {
                         def tests = params.TEST_NAME.replaceAll('\\s', '')
                         taskName = "test --tests \"${tests}\""
@@ -69,32 +67,24 @@ pipeline {
                 }
             }
         }
-
-        stage('Debug Allure Results') {
-            steps {
-                sh '''
-                    if [ -d build/allure-results ]; then
-                        echo "Allure results found:"
-                        ls -la build/allure-results
-                    else
-                        echo "No Allure results found!"
-                    fi
-                '''
-            }
-        }
-
-        stage('Allure Report') {
-            steps {
-                sh './gradlew allureReport'
-            }
-        }
     }
 
     post {
         always {
             script {
-                if (fileExists('build/reports/allure-report/allureReport/widgets/summary.json')) {
-                    def summary = readJSON file: 'build/reports/allure-report/allureReport/widgets/summary.json '
+                // Публикуем Allure-отчет. Это создаст директорию 'build/reports/allure-report'
+                allure([
+                    includeProperties: true,
+                    reportBuildPolicy: 'ALWAYS',
+                    results: [[path: 'build/allure-results']]
+                ])
+
+                // Публикуем результаты JUnit
+                junit '**/build/test-results/test/TEST-*.xml'
+
+                // Теперь файл summary.json должен существовать
+                if (fileExists('build/reports/allure-report/widgets/summary.json')) {
+                    def summary = readJSON file: 'build/reports/allure-report/widgets/summary.json'
 
                     def total = summary.statistic.total
                     def passed = summary.statistic.passed
@@ -102,16 +92,10 @@ pipeline {
                     def broken = summary.statistic.broken
                     def skipped = summary.statistic.skipped
 
-                    allure([
-                        includeProperties: true,
-                        reportBuildPolicy: 'ALWAYS',
-                        results: [[path: 'build/allure-results']]
-                    ])
-
                     def botToken = "8133371990:AAHoB2B54YGTPYMyv6khj4OYSc2MGs1mMi8"
                     def chatId = "8484572689"
 
-                    // формируем текст
+                    // Формируем текст сообщения
                     def messageText = """📊 *Результаты тестов*
 🕒 Duration: ${currentBuild.durationString.replace('and counting', '')}
 📌 Total: ${total}
@@ -122,26 +106,16 @@ pipeline {
 🔗 [Allure Report](${env.BUILD_URL}allure)
 """
 
-                    // билдим ChartGenerator
-                    sh "./gradlew classes"
-
-                    // генерируем chart.png
-                    sh """
-                        java -cp build/classes/java/test:~/.gradle/caches/modules-2/files-2.1/* utils.ChartGenerator \
-                        ${total} ${passed} ${failed} ${broken} ${skipped} chart.png
-                    """
-
-                    // отправляем текст + картинку в Telegram
+                    // Отправляем сообщение в Telegram (без картинки)
                     sh """
                         curl -s -X POST \
-                             -F "chat_id=${chatId}" \
-                             -F "photo=@chart.png" \
-                             -F "caption=${messageText}" \
-                             -F "parse_mode=Markdown" \
-                             "https://api.telegram.org/bot${botToken}/sendPhoto"
+                             -d chat_id=${chatId} \
+                             -d "text=${messageText}" \
+                             -d "parse_mode=Markdown" \
+                             "https://api.telegram.org/bot${botToken}/sendMessage"
                     """
                 } else {
-                    echo "summary.json not found, skipping Telegram notification."
+                    echo "Summary.json not found, skipping Telegram notification."
                 }
 
                 def reportDir = 'build/reports/tests/test'
