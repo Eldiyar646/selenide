@@ -70,7 +70,6 @@ pipeline {
         stage('Generate and Send Report') {
             steps {
                 script {
-                    // Проверяем, существует ли файл Allure-отчета перед началом
                     if (fileExists('allure-report/widgets/summary.json')) {
                         def summary = readJSON file: 'allure-report/widgets/summary.json'
                         def total = summary.statistic.total
@@ -85,7 +84,6 @@ pipeline {
                         // Шаг 2: Запускаем собранный JAR-файл для создания графика
                         sh "java -jar build/libs/chart-generator.jar ${total} ${passed} ${failed} ${broken} ${skipped} chart.png"
 
-                        // Формируем текст сообщения
                         def messageText = """📊 *Результаты тестов*
 🕒 Duration: ${currentBuild.durationString.replace('and counting', '')}
 📌 Total: ${total}
@@ -95,7 +93,6 @@ pipeline {
 ⚠️ Skipped: ${skipped}
 🔗 [Allure Report](${env.BUILD_URL}allure)
 """
-
                         withCredentials([string(credentialsId: 'TELEGRAM_BOT_TOKEN', variable: 'BOT_TOKEN'), string(credentialsId: 'TELEGRAM_CHAT_ID', variable: 'CHAT_ID')]) {
                             if (fileExists('chart.png')) {
                                 sh """
@@ -121,16 +118,12 @@ pipeline {
     post {
         always {
             script {
-                // Публикуем Allure-отчет
                 allure([
                     includeProperties: true,
                     reportBuildPolicy: 'ALWAYS',
                     results: [[path: 'build/allure-results']]
                 ])
-
-                // Публикуем результаты JUnit
                 junit '**/build/test-results/test/TEST-*.xml'
-
                 def reportDir = 'build/reports/tests/test'
                 archiveArtifacts artifacts: "${reportDir}/**", allowEmptyArchive: true
             }
