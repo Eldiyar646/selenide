@@ -14,6 +14,7 @@ import io.qameta.allure.Step;
 import net.datafaker.Faker;
 import org.openqa.selenium.By;
 
+import java.time.Duration;
 import java.time.YearMonth;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -27,10 +28,10 @@ public class SignUpPage extends BasePage<SignUpPage> {
 
     @Override
     public SignUpPage waitForPageLoaded() {
-        var pageTab = navBarElements.find(Condition.partialText("Signup / Login"))
-                .find(By.tagName("a"));
-        pageTab.shouldHave(Condition.attribute("style", "color: orange;"));
-        return this;
+            var pageTab = navBarElements.find(Condition.partialText("Signup / Login"))
+                    .find(By.tagName("a"));
+            pageTab.shouldHave(Condition.attribute("style", "color: orange;"));
+            return this;
     }
 
     @Step("Enter SignUp name")
@@ -48,6 +49,9 @@ public class SignUpPage extends BasePage<SignUpPage> {
     @Step("Click signup button")
     public SignUpPage clickSignUpButton() {
         elementManager.click(ElementsQa.SIGNUP_BUTTON.getElement());
+        // Wait for the account information section to appear after clicking signup
+        $x("//h2[contains(.,'Enter Account Information')]")
+                .shouldBe(visible, Duration.ofSeconds(10));
         return this;
     }
 

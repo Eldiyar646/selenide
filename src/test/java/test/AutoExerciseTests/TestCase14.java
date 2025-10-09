@@ -18,7 +18,7 @@ import static com.selenide.data.UserData.faker;
 import static io.qameta.allure.Allure.step;
 
 
-@Tag(Tags.REGRESSION)
+@Tag(Tags.SMOKE)
 
 public class TestCase14 extends BaseTest {
     UserData user = new UserData();

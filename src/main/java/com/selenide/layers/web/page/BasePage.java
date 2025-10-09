@@ -78,7 +78,8 @@ public abstract class BasePage<T extends BasePage> {
     }
 
     protected void clickNavBarTab(String tabName) {
-        navBarElements.find(Condition.partialText(tabName)).click();
+        var tab = navBarElements.find(Condition.partialText(tabName)).find(By.tagName("a"));
+        elementManager.click(tab);
     }
 
     @Step("Click continue button{0}")

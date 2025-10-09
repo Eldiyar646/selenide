@@ -16,7 +16,7 @@ import test.Tags;
 
 import static io.qameta.allure.Allure.step;
 
-@Tag(Tags.REGRESSION)
+@Tag(Tags.SMOKE)
 
 public class TestCase16 extends BaseTest {
 

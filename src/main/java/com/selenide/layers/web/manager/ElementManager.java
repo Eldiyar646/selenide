@@ -3,6 +3,9 @@ package com.selenide.layers.web.manager;
 import com.codeborne.selenide.SelenideElement;
 import com.selenide.enums.CommonAttributes;
 import com.selenide.layers.web.page.signup.SignUpPage;
+import org.openqa.selenium.ElementClickInterceptedException;
+import static com.codeborne.selenide.Selenide.executeJavaScript;
+import com.codeborne.selenide.ex.InvalidStateError;
 
 import java.time.Duration;
 
@@ -12,11 +15,19 @@ public class ElementManager {
     private final int DELAY = 30;
 
     public ElementManager click(SelenideElement element) {
-        element
-                .shouldBe(visible, Duration.ofSeconds(DELAY))
-                .shouldHave(enabled, Duration.ofSeconds(DELAY))
-                .shouldNotHave(attribute("disabled"))
-                .shouldBe(clickable, Duration.ofSeconds(DELAY)).click();
+        try {
+            element
+                    .shouldBe(visible, Duration.ofSeconds(DELAY))
+                    .shouldHave(enabled, Duration.ofSeconds(DELAY))
+                    .shouldNotHave(attribute("disabled"))
+                    .shouldBe(clickable, Duration.ofSeconds(DELAY))
+                    .scrollIntoView(true)
+                    .click();
+        } catch (ElementClickInterceptedException | InvalidStateError e) {
+            // Fallback to JS click if something intercepts the element
+            element.scrollIntoView(true);
+            executeJavaScript("arguments[0].click();", element);
+        }
         return this;
     }
 
