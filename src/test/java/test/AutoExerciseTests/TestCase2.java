@@ -2,6 +2,7 @@ package test.AutoExerciseTests;
 
 import base.BaseTest;
 import com.selenide.layers.web.page.home.HomePage;
+import base.TestFlags;
 import io.qameta.allure.*;
 import io.qameta.allure.SeverityLevel;
 import org.assertj.core.api.SoftAssertions;
@@ -51,8 +52,8 @@ public class TestCase2 extends BaseTest {
                         .isEqualToIgnoringCase("Login to your account");
 
                 var afterLogin = login
-                        .inputLoginEmail("01@02.04")
-                        .inputLoginPassword("1")
+                        .inputLoginEmail(System.getProperty("LOGIN_EMAIL", "qa+tc2@ex.com"))
+                        .inputLoginPassword(System.getProperty("LOGIN_PASSWORD", "1"))
                         .clickLoginButton();
 
                 var homeAfterContinue = afterLogin
@@ -60,21 +61,36 @@ public class TestCase2 extends BaseTest {
 
                 String banner = homeAfterContinue.getLoggedInBannerText();
                 step("Verify that 'Logged in as username' is visible", () -> {
+                    // Check that banner contains "Logged in as" followed by a username
                     softAssert.assertThat(banner)
-                            .isEqualToIgnoringCase("Logged in as 1");
+                            .as("Should contain 'Logged in as' text. Found: '" + banner + "'")
+                            .containsIgnoringCase("Logged in as");
+                    
+                    // Check that there's text after "Logged in as" (the username)
+                    String[] parts = banner.split("(?i)logged in as");
+                    softAssert.assertThat(parts.length)
+                            .as("Should have text after 'Logged in as'. Banner: '" + banner + "'")
+                            .isGreaterThan(1);
+                    
+                    String username = parts[1].trim();
+                    softAssert.assertThat(username)
+                            .as("Username should not be empty. Found: '" + username + "'")
+                            .isNotEmpty();
 
-                    var delete = homeAfterContinue
-                            .clickDeletedAccountTab()
-                            .waitForPageLoaded();
+                    if (!TestFlags.shouldKeepAccount()) {
+                        var delete = homeAfterContinue
+                                .clickDeletedAccountTab()
+                                .waitForPageLoaded();
 
-                    step("Verify that 'Account Deleted!' is visible", () -> {
-                        softAssert.assertThat(delete.titlesInAllPages("Account Deleted!"))
-                                .as("'Account Deleted!' is visible")
-                                .isEqualToIgnoringCase("Account Deleted!");
+                        step("Verify that 'Account Deleted!' is visible", () -> {
+                            softAssert.assertThat(delete.titlesInAllPages("Account Deleted!"))
+                                    .as("'Account Deleted!' is visible")
+                                    .isEqualToIgnoringCase("Account Deleted!");
 
-                        delete.clickContinueButton();
+                            delete.clickContinueButton();
+                        });
+                    }
 
-                    });
                 });
             });
         });

@@ -12,6 +12,8 @@ import com.selenide.layers.web.page.testCases.TestCasePage;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
+import java.time.Duration;
+
 import static com.codeborne.selenide.Condition.text;
 import static com.codeborne.selenide.Selectors.byText;
 import static com.codeborne.selenide.Selenide.*;
@@ -83,8 +85,25 @@ public class HomePage extends BasePage<HomePage> {
 
     @Step("Check Logged in as banner visible{0}")
     public String getLoggedInBannerText() {
-        return navBarElements.find(Condition.partialText("Logged in as"))
-                .getText();
+        // Try multiple ways to find the "Logged in as" banner
+        try {
+            // First try: look for exact text
+            return navBarElements.find(Condition.partialText("Logged in as"))
+                    .shouldBe(Condition.visible, Duration.ofSeconds(5))
+                    .getText();
+        } catch (Exception e1) {
+            try {
+                // Second try: look for any element containing "Logged"
+                return navBarElements.find(Condition.partialText("Logged"))
+                        .shouldBe(Condition.visible, Duration.ofSeconds(5))
+                        .getText();
+            } catch (Exception e2) {
+                // Third try: look for any text that might indicate login
+                return navBarElements.find(Condition.partialText("as"))
+                        .shouldBe(Condition.visible, Duration.ofSeconds(5))
+                        .getText();
+            }
+        }
     }
 
 

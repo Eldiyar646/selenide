@@ -3,6 +3,7 @@ package test.AutoExerciseTests;
 import base.BaseTest;
 import com.selenide.data.UserData;
 import com.selenide.layers.web.page.home.HomePage;
+import base.TestFlags;
 import io.qameta.allure.Description;
 import io.qameta.allure.Owner;
 import io.qameta.allure.Severity;
@@ -185,15 +186,17 @@ public class TestCase14 extends BaseTest {
                                             .as("Success message should be present")
                                             .contains("Your order has been placed successfully!");
 
-                                    deleteAccount.clickDeletedAccountTab();
+                                    if (!TestFlags.shouldKeepAccount()) {
+                                        deleteAccount.clickDeletedAccountTab();
 
-                                    step("Verify that 'Account Deleted!' is visible", () -> {
-                                        softAssert.assertThat(deleteAccount.titlesInAllPages("Account Deleted!"))
-                                                .as("'Account Deleted!' is visible")
-                                                .isEqualToIgnoringCase("Account Deleted!");
+                                        step("Verify that 'Account Deleted!' is visible", () -> {
+                                            softAssert.assertThat(deleteAccount.titlesInAllPages("Account Deleted!"))
+                                                    .as("'Account Deleted!' is visible")
+                                                    .isEqualToIgnoringCase("Account Deleted!");
 
-                                        deleteAccount.clickContinueButton();
-                                    });
+                                            deleteAccount.clickContinueButton();
+                                        });
+                                    }
                                 });
                             });
                         });

@@ -12,9 +12,7 @@ import org.openqa.selenium.NoAlertPresentException;
 import java.time.Duration;
 
 import static com.codeborne.selenide.Condition.visible;
-import static com.codeborne.selenide.Selectors.byText;
-import static com.codeborne.selenide.Selenide.$x;
-import static com.codeborne.selenide.Selenide.$;
+import static com.codeborne.selenide.Selenide.*;
 import static com.codeborne.selenide.Selenide.page;
 
 public class PaymentSection extends BasePage<PaymentSection> {

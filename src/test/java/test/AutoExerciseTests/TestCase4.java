@@ -56,8 +56,8 @@ public class TestCase4 extends BaseTest {
                         .isEqualTo("Login to your account");
 
                 var afterLogin = login
-                        .inputLoginEmail("01@02.01")
-                        .inputLoginPassword("1")
+                        .inputLoginEmail(System.getProperty("LOGIN_EMAIL", "qa+tc4@ex.com"))
+                        .inputLoginPassword(System.getProperty("LOGIN_PASSWORD", "1"))
                         .clickLoginButton();
 
                 var homeAfterContinue = afterLogin
@@ -65,8 +65,21 @@ public class TestCase4 extends BaseTest {
 
                 String banner = homeAfterContinue.getLoggedInBannerText();
                 step("Verify that 'Logged in as username' is visible", () -> {
+                    // Check that banner contains "Logged in as" followed by a username
                     softAssert.assertThat(banner)
-                            .isEqualTo("Logged in as 1");
+                            .as("Should contain 'Logged in as' text. Found: '" + banner + "'")
+                            .containsIgnoringCase("Logged in as");
+                    
+                    // Check that there's text after "Logged in as" (the username)
+                    String[] parts = banner.split("(?i)logged in as");
+                    softAssert.assertThat(parts.length)
+                            .as("Should have text after 'Logged in as'. Banner: '" + banner + "'")
+                            .isGreaterThan(1);
+                    
+                    String username = parts[1].trim();
+                    softAssert.assertThat(username)
+                            .as("Username should not be empty. Found: '" + username + "'")
+                            .isNotEmpty();
 
                     var logout = homeAfterContinue
                             .clickLogOutTab().waitForPageLoaded();

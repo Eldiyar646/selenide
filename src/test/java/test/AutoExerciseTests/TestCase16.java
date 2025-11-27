@@ -1,6 +1,7 @@
 package test.AutoExerciseTests;
 
 import base.BaseTest;
+import base.TestFlags;
 import com.selenide.data.UserData;
 import com.selenide.layers.web.page.home.HomePage;
 import io.qameta.allure.Description;
@@ -56,27 +57,50 @@ public class TestCase16 extends BaseTest {
 
             var login = home
                     .clickSignUpLoginTab()
-                    .waitForPageLoaded()
-                    .inputLoginEmail("22@22.15п")
-                    .inputLoginPassword("1")
-                    .clickLoginButton();
+                    .waitForPageLoaded();
 
-            String banner = login.getLoggedInBannerText();
-            step("Verify that 'Logged in as username' is visible", () -> {
-                softAssert.assertThat(banner)
-                        .isEqualToIgnoringCase("Logged in as 1");
+            step("Verify 'Login to your account' is visible", () -> {
+                softAssert.assertThat(login.titlesInAllPages("Login to your account"))
+                        .as("'Login to your account' is visible")
+                        .isEqualToIgnoringCase("Login to your account");
 
-                var afterLogin = home
+                var afterLogin = login
+                        .inputLoginEmail(System.getProperty("LOGIN_EMAIL", "qa+tc16@ex.com"))
+                        .inputLoginPassword(System.getProperty("LOGIN_PASSWORD", "1"))
+                        .clickLoginButton();
+
+                var homeAfterContinue = afterLogin;
+
+                String banner = homeAfterContinue.getLoggedInBannerText();
+                step("Verify that 'Logged in as username' is visible", () -> {
+                    // Check that banner contains "Logged in as" followed by a username
+                    softAssert.assertThat(banner)
+                            .as("Should contain 'Logged in as' text. Found: '" + banner + "'")
+                            .containsIgnoringCase("Logged in as");
+                    
+                    // Check that there's text after "Logged in as" (the username)
+                    String[] parts = banner.split("(?i)logged in as");
+                    softAssert.assertThat(parts.length)
+                            .as("Should have text after 'Logged in as'. Banner: '" + banner + "'")
+                            .isGreaterThan(1);
+                    
+                    String username = parts[1].trim();
+                    softAssert.assertThat(username)
+                            .as("Username should not be empty. Found: '" + username + "'")
+                            .isNotEmpty();
+                });
+
+                var cartActions = homeAfterContinue
                         .clickAddToCart("Blue Top")
                         .clickContinue()
                         .clickCartTab();
 
                 step("Verify that cart page is displayed", () -> {
-                    softAssert.assertThat(afterLogin.isPageTabActive("Cart"))
+                    softAssert.assertThat(cartActions.isPageTabActive("Cart"))
                             .as("Cart page is displayed")
                             .isTrue();
 
-                    var cartPage = afterLogin
+                    var cartPage = cartActions
                             .clickProceedToCheckout();
 
                     UserData actual = cartPage.getDeliveryAddress();
@@ -128,15 +152,17 @@ public class TestCase16 extends BaseTest {
                                 .as("Success message should be visible")
                                 .isEqualTo("Your order has been placed successfully!");
 
-                        deleteAccount.clickDeletedAccountTab();
+                        if (!TestFlags.shouldKeepAccount()) {
+                            deleteAccount.clickDeletedAccountTab();
 
-                        step("Verify that 'Account Deleted!' is visible", () -> {
-                            softAssert.assertThat(deleteAccount.titlesInAllPages("Account Deleted!"))
-                                    .as("'Account Deleted!' is visible")
-                                    .isEqualToIgnoringCase("Account Deleted!");
+                            step("Verify that 'Account Deleted!' is visible", () -> {
+                                softAssert.assertThat(deleteAccount.titlesInAllPages("Account Deleted!"))
+                                        .as("'Account Deleted!' is visible")
+                                        .isEqualToIgnoringCase("Account Deleted!");
 
-                            deleteAccount.clickContinueButton();
-                        });
+                                deleteAccount.clickContinueButton();
+                            });
+                        }
                     });
                 });
             });

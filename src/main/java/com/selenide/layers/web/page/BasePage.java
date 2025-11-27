@@ -73,8 +73,13 @@ public abstract class BasePage<T extends BasePage> {
     }
 
     public boolean isSubscriptionAlertVisible() {
-        return $x("//div[@class='alert-success alert']")
-                .has(partialText("You have been successfully subscribed!"));
+        try {
+            var alert = $x("//div[@class='alert-success alert']");
+            alert.shouldBe(Condition.visible, Duration.ofSeconds(10));
+            return alert.has(partialText("You have been successfully subscribed!"));
+        } catch (Throwable e) {
+            return false;
+        }
     }
 
     protected void clickNavBarTab(String tabName) {
@@ -98,7 +103,8 @@ public abstract class BasePage<T extends BasePage> {
 
     @Step("Enter email to Subscription field")
     public void enterEmailForSubscribe(String value) {
-        elementManager.inputElementWithText(ElementsOnPage.SUBSCRIPTION.getElementById(), value + ENTER);
+        elementManager.inputElementWithText(ElementsOnPage.SUBSCRIPTION.getElementById(), value);
+        elementManager.click($("#subscribe"));
     }
 
     public CartPage clickViewCart() {

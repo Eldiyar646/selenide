@@ -2,6 +2,7 @@ package test.AutoExerciseTests;
 
 import base.BaseTest;
 import com.selenide.data.UserData;
+import base.TestFlags;
 import com.selenide.layers.web.page.home.HomePage;
 import io.qameta.allure.*;
 import io.qameta.allure.SeverityLevel;
@@ -99,7 +100,7 @@ public class TestCase1 extends BaseTest {
 
                     step("Verify that 'Account Created!' is visible", () -> {
                         softAssert.assertThat(accountCreated.titlesInAllPages("Account Created!"))
-                                .as("   Account Created! is visible")
+                                .as("Account Created! is visible")
                                 .isEqualToIgnoringCase("Account Created!");
 
                         var homeAfterContinue = accountCreated.clickContinueButton().waitForPageLoaded();
@@ -110,15 +111,17 @@ public class TestCase1 extends BaseTest {
                                     .as("'Logged in as <username>' is visible")
                                     .isEqualToIgnoringCase("Logged in as " + generatedName);
 
-                            var delete = homeAfterContinue.clickDeletedAccountTab().waitForPageLoaded();
+                            if (!TestFlags.shouldKeepAccount()) {
+                                var delete = homeAfterContinue.clickDeletedAccountTab().waitForPageLoaded();
 
-                            step("Verify that 'Account Deleted!' is visible", () -> {
-                                softAssert.assertThat(delete.titlesInAllPages("Account Deleted!"))
-                                        .as("'Account Deleted!' is visible")
-                                        .isEqualToIgnoringCase("Account Deleted!");
+                                step("Verify that 'Account Deleted!' is visible", () -> {
+                                    softAssert.assertThat(delete.titlesInAllPages("Account Deleted!"))
+                                            .as("'Account Deleted!' is visible")
+                                            .isEqualToIgnoringCase("Account Deleted!");
 
-                                delete.clickContinueButton();
-                            });
+                                    delete.clickContinueButton();
+                                });
+                            }
                         });
                     });
                 });

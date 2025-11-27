@@ -49,8 +49,8 @@ public class TestCase3 extends BaseTest {
                         .isEqualToIgnoringCase("Login to your account");
 
                 login
-                        .inputLoginEmail("22@22.18")
-                        .inputLoginPassword("1")
+                        .inputLoginEmail(System.getProperty("LOGIN_EMAIL", "qa+tc2@ex.com"))
+                        .inputLoginPassword("wrongpassword")
                         .clickLoginButton();
 
                 step("Verify error 'Your email or password is incorrect!' is visible", () -> {

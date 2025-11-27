@@ -6,6 +6,8 @@ import com.selenide.layers.web.page.BasePage;
 import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 
+import java.time.Duration;
+
 import static com.codeborne.selenide.Selenide.$;
 
 
@@ -14,9 +16,11 @@ public class ProductsPage extends BasePage<ProductsPage> {
     @Override
     @Step("Wait for page is loaded{0}")
     public ProductsPage waitForPageLoaded() {
+        // Wait for Products tab to be active
         var pageTab = navBarElements.find(Condition.partialText("Products"))
                 .find(By.tagName("a"));
-        pageTab.shouldHave(Condition.attribute("style", "color: orange;"));
+        pageTab.shouldHave(Condition.attribute("style", "color: orange;"), Duration.ofSeconds(10));
+        
         return this;
     }
 
@@ -35,7 +39,11 @@ public class ProductsPage extends BasePage<ProductsPage> {
     @Step("Click add product button")
     public ProductsPage clickAddProduct(String productName) {
         var product = productCard.find(Condition.partialText(productName));
+        product.shouldBe(Condition.visible, Duration.ofSeconds(10));
+        
         var addButton = product.$("a.add-to-cart");
+        addButton.shouldBe(Condition.visible, Duration.ofSeconds(10));
+        
         elementManager.click(addButton);
         return this;
     }
